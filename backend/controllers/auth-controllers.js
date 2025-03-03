@@ -1,9 +1,11 @@
 import User from "../model/user.js";
 import bcrypt from "bcryptjs";
 import { generateJWTToken } from "../utils/generateJWTToken.js";
+import Workout from "../model/workout.js";
+import Exercise from "../model/exercise.js";
 
 export const signup = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { email, name, password } = req.body;
     try {
       if (!name || !email || !password) {
         return res.status(400).json({ message: "Please fill in all fields." });
@@ -100,6 +102,92 @@ export const signup = async (req, res) => {
       res.status(401).json({
         success: false,
         message: "Error checking authentication",
+      });
+    };
+  };
+  export const addWorkout = async (req, res) => {
+    const { title, type, exercises } = req.body;
+  
+    if (!title || !type || !exercises) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required: title, type, exercises",
+      });
+    }
+  
+    try {
+      exercises.forEach(exercise => {
+        if (!exercise.exerciseId || typeof exercise.sets !== 'number' || typeof exercise.reps !== 'number') {
+          return res.status(400).json({
+            success: false,
+            message: "Invalid exercise data",
+          });
+        }
+      });
+  
+      const newWorkout = new Workout({
+        id: Math.floor(Math.random() * 1000000),  
+        title,
+        type,
+        date: new Date(),
+        exercises,
+      });
+  
+      await newWorkout.save();
+  
+      return res.status(201).json({
+        success: true,
+        message: "Workout created successfully",
+        workout: newWorkout,
+      });
+  
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({
+        success: false,
+        message: "Error creating workout",
+      });
+    }
+  };
+  export const addExercise = async (req, res) => {
+    const { name, type, description, bodyPart } = req.body;
+  
+    if (!name || !type || (type === 'weights' && !bodyPart)) {
+      return res.status(400).json({
+        success: false,
+        message: "Required fields missing: name, type, and for weights, a non-empty bodyPart",
+      });
+    }
+  
+    if (type !== 'cardio' && type !== 'weights') {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid type. Must be either 'cardio' or 'weights'",
+      });
+    }
+  
+    try {
+      const newExercise = new Exercise({
+        id: Math.floor(Math.random() * 1000000), 
+        name,
+        type,
+        description: description || "",
+        bodyPart: type === 'weights' ? bodyPart : "", 
+        dateAdded: new Date(),
+      });
+  
+      await newExercise.save();
+  
+      return res.status(201).json({
+        success: true,
+        message: "Exercise created successfully",
+        exercise: newExercise,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        success: false,
+        message: "Error creating exercise",
       });
     }
   };

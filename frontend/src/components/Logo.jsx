@@ -1,12 +1,15 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Logo = () => {
   return (
-    <img
-      src="/logo.jpg" 
-      alt="Logo"
-      className="fixed top-5 left-5 rounded-full w-24 h-24 object-cover" 
-    />
+    <Link to="/">
+      <img
+        src="/logo.jpg"
+        alt="Logo"
+        className="fixed top-4 left-4 rounded-full w-18 h-18 object-cover border-2 border-white shadow-md"
+      />
+    </Link>
   );
 };
 
