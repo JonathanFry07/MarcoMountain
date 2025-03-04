@@ -1,9 +1,11 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { Dumbbell, Heart } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
+import { useAuthStore } from "@/store/authStore"
+
 
 const workouts = [
   {
@@ -51,7 +53,11 @@ const workouts = [
   },
 ]
 
+
 export default function WorkoutPage() {
+  //const { workouts, getWorkouts } = useAuthStore();
+
+
   return (
     <div className="container mx-auto py-6 px-4 md:px-6">
       <div className="flex flex-col space-y-2 mb-8">
@@ -152,4 +158,3 @@ function ExerciseItem({ exercise, type }) {
     )
   }
 }
-
