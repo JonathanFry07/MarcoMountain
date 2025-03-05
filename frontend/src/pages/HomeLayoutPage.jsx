@@ -5,7 +5,7 @@ import LoginForm from '../components/LoginForm';
 import SignUpForm from '../components/SignUpForm';
 
 const HomeLayoutPage = () => {
-    const { isAuthenticated, user } = useAuthStore();
+    const { isAuthenticated } = useAuthStore();
     const [ toggleForm, setToggleForm] = useState(true)
 
     return (

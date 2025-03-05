@@ -5,90 +5,53 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { useAuthStore } from "@/store/authStore"
-
-
-const workouts = [
-  {
-    id: 1,
-    title: "Morning Cardio Blast",
-    type: "cardio",
-    date: "2023-10-15",
-    exercises: [],
-  },
-  {
-    id: 2,
-    title: "Upper Body Strength",
-    type: "weights",
-    date: "2023-10-14",
-    exercises: [
-      { name: "Bench Press", sets: 3, reps: 10, weight: "60 kg" },
-      { name: "Shoulder Press", sets: 3, reps: 12, weight: "40 kg" },
-      { name: "Bicep Curls", sets: 4, reps: 12, weight: "15 kg" },
-      { name: "Tricep Extensions", sets: 3, reps: 15, weight: "25 kg" },
-    ],
-  },
-  {
-    id: 3,
-    title: "HIIT Session",
-    type: "cardio",
-    date: "2023-10-12",
-    exercises: [
-      { name: "Burpees", duration: "45 sec", sets: 4 },
-      { name: "Mountain Climbers", duration: "45 sec", sets: 4 },
-      { name: "High Knees", duration: "45 sec", sets: 4 },
-      { name: "Rest", duration: "15 sec", sets: 4 },
-    ],
-  },
-  {
-    id: 4,
-    title: "Leg Day",
-    type: "weights",
-    date: "2023-10-10",
-    exercises: [
-      { name: "Squats", sets: 4, reps: 12, bodyPart: "Chest"},
-      { name: "Leg Press", sets: 3, reps: 10},
-      { name: "Lunges", sets: 3, reps: 10 },
-      { name: "Calf Raises", sets: 4, reps: 15},
-    ],
-  },
-]
-
+import AddWorkoutButton from "@/components/AddWorkoutButton"
 
 export default function WorkoutPage() {
-  //const { workouts, getWorkouts } = useAuthStore();
-
+  const { workouts, getWorkouts } = useAuthStore();
+  
+  useEffect(() => {
+    getWorkouts();
+  }, [getWorkouts]);
 
   return (
-    <div className="container mx-auto py-6 px-4 md:px-6">
-      <div className="flex flex-col space-y-2 mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">My Workouts</h1>
-        <p className="text-gray-600">View and track your workout progress</p>
+    <div className="relative h-screen flex flex-col">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="container mx-auto">
+          <div className="flex flex-col space-y-2 mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">My Workouts</h1>
+            <p className="text-gray-600">View and track your workout progress</p>
+          </div>
+
+          <Tabs defaultValue="all" className="mb-8">
+            <TabsList className="bg-teal-500">
+              <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-teal-500">
+                All
+              </TabsTrigger>
+              <TabsTrigger value="cardio" className="data-[state=active]:bg-white data-[state=active]:text-teal-500">
+                Cardio
+              </TabsTrigger>
+              <TabsTrigger value="weights" className="data-[state=active]:bg-white data-[state=active]:text-teal-500">
+                Weights
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="all">
+              <WorkoutList workouts={workouts} />
+            </TabsContent>
+            <TabsContent value="cardio">
+              <WorkoutList workouts={workouts.filter((workout) => workout.type === "cardio")} />
+            </TabsContent>
+            <TabsContent value="weights">
+              <WorkoutList workouts={workouts.filter((workout) => workout.type === "weights")} />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
-      <Tabs defaultValue="all" className="mb-8">
-        <TabsList className="bg-teal-500">
-          <TabsTrigger value="all" className="data-[state=active]:bg-white data-[state=active]:text-teal-500">
-            All
-          </TabsTrigger>
-          <TabsTrigger value="cardio" className="data-[state=active]:bg-white data-[state=active]:text-teal-500">
-            Cardio
-          </TabsTrigger>
-          <TabsTrigger value="weights" className="data-[state=active]:bg-white data-[state=active]:text-teal-500">
-            Weights
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="all">
-          <WorkoutList workouts={workouts} />
-        </TabsContent>
-        <TabsContent value="cardio">
-          <WorkoutList workouts={workouts.filter((workout) => workout.type === "cardio")} />
-        </TabsContent>
-        <TabsContent value="weights">
-          <WorkoutList workouts={workouts.filter((workout) => workout.type === "weights")} />
-        </TabsContent>
-      </Tabs>
+      <AddWorkoutButton />
     </div>
-  )
+  );
 }
 
 function WorkoutList({ workouts }) {
