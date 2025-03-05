@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Dumbbell, Heart, DiamondPlus } from "lucide-react";
+import ExerciseSelector from "./ExerciseSelector";
 
 const AddWorkoutForm = ({ onClose }) => {
     const [title, setTitle] = useState("");
     const [type, setType] = useState("weights");
+    const [exerciseSelectorVisible, setExerciseSelectorVisible] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -11,10 +13,15 @@ const AddWorkoutForm = ({ onClose }) => {
         onClose();
     };
 
+    const addExercise = (e) => {
+        e.preventDefault();
+        setExerciseSelectorVisible(!exerciseSelectorVisible);
+    }
+
     return (
-        <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
+        <div className="fixed inset-0 flex items-center justify-center z-50 px-4 outline outline-cyan-500">
             {/* Modal content */}
-            <div className="relative bg-white p-6 rounded shadow-md max-w-md w-full">
+            <div className="relative bg-white p-6 rounded shadow-md max-w-md w-full max-h-[80vh] overflow-y-auto">
                 {/* Icon in top-right corner */}
                 <div className="absolute top-3 right-3 text-gray-600">
                     {type === "cardio" ? (
@@ -55,12 +62,19 @@ const AddWorkoutForm = ({ onClose }) => {
                         <button
                             type="button"
                             className="flex items-center px-4 py-2 bg-teal-600 text-white rounded hover:bg-gray-400"
-                            onClick={() => console.log("Add Exercise clicked")}
+                            onClick={addExercise}
                         >
                             Add Exercise
                             <DiamondPlus className="ml-2" />
                         </button>
                     </div>
+
+                    {/* Render ExerciseSelector if button is clicked */}
+                    {exerciseSelectorVisible && (
+                        <div className="mb-4">
+                            <ExerciseSelector selectedType={type} />
+                        </div>
+                    )}
 
                     <div className="flex justify-end">
                         <button
