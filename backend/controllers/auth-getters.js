@@ -46,8 +46,8 @@ export const getExercises = async (req, res) => {
       const exercises = await Exercise.find();
   
       const filteredExercises = exercises.map(exercise => {
-        const { name, type, description, bodyPart } = exercise._doc;
-        const result = { name, type, description };
+        const { id, name, type, description, bodyPart } = exercise._doc;
+        const result = { id, name, type, description };
         if (bodyPart !== "") {
           result.bodyPart = bodyPart;
         }

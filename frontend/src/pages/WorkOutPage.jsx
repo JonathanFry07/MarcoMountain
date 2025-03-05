@@ -98,26 +98,28 @@ function WorkoutCard({ workout }) {
     )
   }
 
-function ExerciseItem({ exercise, type }) {
-  if (type === "cardio") {
-    return (
-      <div className="text-sm">
-        <div className="font-medium text-gray-800">{exercise.name}</div>
-        <div className="text-gray-600 grid grid-cols-2 gap-1 mt-1">
-          {exercise.duration && <div>Duration: {exercise.duration}</div>}
+  function ExerciseItem({ exercise, type }) {
+    if (type === "cardio") {
+      return (
+        <div className="text-sm">
+          <div className="font-medium text-gray-800">{exercise.name}</div>
+          <div className="text-gray-600 grid grid-cols-2 gap-1 mt-1">
+            <div>Distance: {exercise.distance} km</div>
+            {exercise.duration && <div>Duration: {exercise.duration}</div>}
+          </div>
         </div>
-      </div>
-    )
-  } else {
-    return (
-      <div className="text-sm">
-        <div className="font-medium text-gray-800">{exercise.name}</div>
-        <div className="text-gray-600 grid grid-cols-3 gap-1 mt-1">
-          <div>Sets: {exercise.sets}</div>
-          <div>Reps: {exercise.reps}</div>
-          <div>{exercise.bodyPart}</div>
+      );
+    } else {
+      return (
+        <div className="text-sm">
+          <div className="font-medium text-gray-800">{exercise.name}</div>
+          <div className="text-gray-600 grid grid-cols-3 gap-1 mt-1">
+            <div>Sets: {exercise.sets}</div>
+            <div>Reps: {exercise.reps}</div>
+            <div>{exercise.bodyPart}</div>
+          </div>
         </div>
-      </div>
-    )
+      );
+    }
   }
-}
+  

@@ -117,10 +117,25 @@ export const signup = async (req, res) => {
   
     try {
       exercises.forEach(exercise => {
-        if (!exercise.exerciseId || typeof exercise.sets !== 'number' || typeof exercise.reps !== 'number') {
+        if (!exercise.exerciseId || !exercise.name) {
           return res.status(400).json({
             success: false,
-            message: "Invalid exercise data",
+            message: "Exercise ID and name are required",
+          });
+        }
+
+        // Validation based on workout type
+        if (type === 'weights' && (!exercise.sets || !exercise.reps)) {
+          return res.status(400).json({
+            success: false,
+            message: "Weights exercises require sets and reps",
+          });
+        }
+
+        if (type === 'cardio' && !exercise.distance) {
+          return res.status(400).json({
+            success: false,
+            message: "Cardio exercises require distance",
           });
         }
       });
