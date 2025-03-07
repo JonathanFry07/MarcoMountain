@@ -1,41 +1,41 @@
-import React, { useState } from "react";
-import { Dumbbell, Heart, DiamondPlus, Trash2, Edit } from "lucide-react";
-import ExerciseSelector from "./ExerciseSelector";
-import { useAuthStore } from "@/store/authStore";
+import React, { useState } from "react"
+import { Dumbbell, Heart, DiamondPlus, Trash2, Edit, ChevronUp, ChevronDown } from "lucide-react"
+import ExerciseSelector from "./ExerciseSelector"
+import { useAuthStore } from "@/store/authStore"
 
 const AddWorkoutForm = ({ onClose }) => {
-  const [title, setTitle] = useState("");
-  const [type, setType] = useState("weights"); // This determines the workout type
-  const [exercises, setExercises] = useState([]);
-  const [exerciseSelectorVisible, setExerciseSelectorVisible] = useState(false);
-  const [editingExerciseIndex, setEditingExerciseIndex] = useState(null);
+  const [title, setTitle] = useState("")
+  const [type, setType] = useState("weights") // This determines the workout type
+  const [exercises, setExercises] = useState([])
+  const [exerciseSelectorVisible, setExerciseSelectorVisible] = useState(false)
+  const [editingExerciseIndex, setEditingExerciseIndex] = useState(null)
 
-  const { createWorkout, getWorkouts, user } = useAuthStore();
+  const { createWorkout, getWorkouts, user } = useAuthStore()
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
-    console.log("Exercises:", exercises);
+    console.log("Exercises:", exercises)
 
     if (!title.trim()) {
-      console.error("Error: Workout title is required.");
-      return;
+      console.error("Error: Workout title is required.")
+      return
     }
 
     if (exercises.length === 0) {
-      console.error("Error: At least one exercise must be added.");
-      return;
+      console.error("Error: At least one exercise must be added.")
+      return
     }
 
     try {
-      const result = await createWorkout(title, type, exercises, user.email);
-      console.log("Workout created successfully:", result);
-      getWorkouts(user.email);
-      onClose();
+      const result = await createWorkout(title, type, exercises, user.email)
+      console.log("Workout created successfully:", result)
+      getWorkouts(user.email)
+      onClose()
     } catch (error) {
-      console.error("Error creating workout:", error);
+      console.error("Error creating workout:", error)
     }
-  };
+  }
 
   // Use the parent's type to decide which fields to include.
   const addExercise = (exercise) => {
@@ -49,14 +49,13 @@ const AddWorkoutForm = ({ onClose }) => {
           : {
               sets: Number(exercise.sets), // Use sets and reps for weights
               reps: Number(exercise.reps),
-            }
-        ),
-      };
-      
-      const updatedExercises = [...exercises];
-      updatedExercises[editingExerciseIndex] = orderedExercise;
-      setExercises(updatedExercises);
-      setEditingExerciseIndex(null);
+            }),
+      }
+
+      const updatedExercises = [...exercises]
+      updatedExercises[editingExerciseIndex] = orderedExercise
+      setExercises(updatedExercises)
+      setEditingExerciseIndex(null)
     } else {
       // Add a new exercise
       const orderedExercise = {
@@ -67,26 +66,45 @@ const AddWorkoutForm = ({ onClose }) => {
           : {
               sets: Number(exercise.sets), // Use sets and reps for weights
               reps: Number(exercise.reps),
-            }
-        ),
-      };
-      setExercises([...exercises, orderedExercise]);
+            }),
+      }
+      setExercises([...exercises, orderedExercise])
     }
-    setExerciseSelectorVisible(false); // Close exercise selector after adding
-  };
+    setExerciseSelectorVisible(false) // Close exercise selector after adding
+  }
 
   // Function to remove an exercise from the list
   const removeExercise = (index) => {
-    const updatedExercises = [...exercises];
-    updatedExercises.splice(index, 1);
-    setExercises(updatedExercises);
-  };
+    const updatedExercises = [...exercises]
+    updatedExercises.splice(index, 1)
+    setExercises(updatedExercises)
+  }
 
   // Function to start editing an exercise
   const startEditExercise = (index) => {
-    setEditingExerciseIndex(index);
-    setExerciseSelectorVisible(true);
-  };
+    setEditingExerciseIndex(index)
+    setExerciseSelectorVisible(true)
+  }
+
+  // Function to move an exercise up in the list
+  const moveExerciseUp = (index) => {
+    if (index === 0) return // Already at the top
+    const updatedExercises = [...exercises]
+    const temp = updatedExercises[index]
+    updatedExercises[index] = updatedExercises[index - 1]
+    updatedExercises[index - 1] = temp
+    setExercises(updatedExercises)
+  }
+
+  // Function to move an exercise down in the list
+  const moveExerciseDown = (index) => {
+    if (index === exercises.length - 1) return // Already at the bottom
+    const updatedExercises = [...exercises]
+    const temp = updatedExercises[index]
+    updatedExercises[index] = updatedExercises[index + 1]
+    updatedExercises[index + 1] = temp
+    setExercises(updatedExercises)
+  }
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 px-4 outline outline-cyan-500">
@@ -125,8 +143,8 @@ const AddWorkoutForm = ({ onClose }) => {
               type="button"
               className="w-full flex justify-center items-center px-4 py-2 bg-teal-600 text-white rounded hover:bg-gray-400"
               onClick={() => {
-                setEditingExerciseIndex(null); // Ensure we're adding, not editing
-                setExerciseSelectorVisible(true);
+                setEditingExerciseIndex(null) // Ensure we're adding, not editing
+                setExerciseSelectorVisible(true)
               }}
             >
               Add Exercise <DiamondPlus className="ml-2" />
@@ -136,15 +154,13 @@ const AddWorkoutForm = ({ onClose }) => {
             <div>
               {editingExerciseIndex !== null && (
                 <div className="mb-2 bg-blue-50 p-2 rounded text-sm flex items-center">
-                  <span className="font-medium">Editing:</span> 
-                  <span className="ml-1">
-                    {exercises[editingExerciseIndex].name}
-                  </span>
-                  <button 
+                  <span className="font-medium">Editing:</span>
+                  <span className="ml-1">{exercises[editingExerciseIndex].name}</span>
+                  <button
                     type="button"
                     onClick={() => {
-                      setEditingExerciseIndex(null);
-                      setExerciseSelectorVisible(false);
+                      setEditingExerciseIndex(null)
+                      setExerciseSelectorVisible(false)
                     }}
                     className="ml-auto text-gray-600 hover:text-gray-800"
                   >
@@ -152,9 +168,9 @@ const AddWorkoutForm = ({ onClose }) => {
                   </button>
                 </div>
               )}
-              <ExerciseSelector 
-                selectedType={type} 
-                onAddExercise={addExercise} 
+              <ExerciseSelector
+                selectedType={type}
+                onAddExercise={addExercise}
                 initialValues={editingExerciseIndex !== null ? exercises[editingExerciseIndex] : null}
               />
             </div>
@@ -162,13 +178,35 @@ const AddWorkoutForm = ({ onClose }) => {
           <ul className="mb-4">
             {exercises.map((ex, index) => (
               <li key={index} className="p-2 border-b border-gray-300 flex justify-between items-center">
-                <span>
-                  {ex.name} (
-                  {type === "cardio"
-                    ? `${ex.distance} km`
-                    : `${ex.sets} sets, ${ex.reps} reps`}
-                  )
-                </span>
+                <div className="flex items-center">
+                  <div className="flex flex-col mr-2">
+                    <button
+                      type="button"
+                      onClick={() => moveExerciseUp(index)}
+                      disabled={index === 0}
+                      className={`text-gray-500 hover:text-gray-700 p-0.5 ${
+                        index === 0 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                      }`}
+                      aria-label="Move exercise up"
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => moveExerciseDown(index)}
+                      disabled={index === exercises.length - 1}
+                      className={`text-gray-500 hover:text-gray-700 p-0.5 ${
+                        index === exercises.length - 1 ? "opacity-30 cursor-not-allowed" : "cursor-pointer"
+                      }`}
+                      aria-label="Move exercise down"
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <span>
+                    {ex.name} ({type === "cardio" ? `${ex.distance} km` : `${ex.sets} sets, ${ex.reps} reps`})
+                  </span>
+                </div>
                 <div className="flex space-x-1">
                   <button
                     type="button"
@@ -198,17 +236,15 @@ const AddWorkoutForm = ({ onClose }) => {
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-teal-500 text-white rounded hover:bg-blue-600"
-            >
+            <button type="submit" className="px-4 py-2 bg-teal-500 text-white rounded hover:bg-blue-600">
               Add Workout
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AddWorkoutForm;
+export default AddWorkoutForm
+

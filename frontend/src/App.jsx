@@ -8,6 +8,8 @@ import LogOut from './components/LogOut';
 import Logo from './components/Logo';
 
 function App() {
+  window['__react-beautiful-dnd-disable-dev-warnings'] = true;
+
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
