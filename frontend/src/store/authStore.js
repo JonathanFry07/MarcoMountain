@@ -119,6 +119,30 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
+  getWorkoutById: async(id) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`${API_URL}/get-workout-id/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      set({isLoading: false, workouts: data });
+
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
   getExercises: async() => {
     set({ isLoading: true, error: null });
     try {

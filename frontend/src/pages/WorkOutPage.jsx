@@ -73,7 +73,7 @@ function WorkoutCard({ workout }) {
 
   const handleTrackClick = (id) => {
     console.log("Tracking workout with ID:", id); // Logs the ID of the workout when the "Track" button is clicked
-    navigate(`/trackingWorkout/${id}`); // Navigate to the /trackingWorkout/:id page
+    navigate(`/tracking-workout/${id}`); // Navigate to the /trackingWorkout/:id page
   };
 
   return (

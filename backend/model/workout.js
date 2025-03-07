@@ -13,6 +13,7 @@ const workoutSchema = new mongoose.Schema({
   exercises: [
     {
       exerciseId: { type: Number, required: true },  
+      name: { type: String, required: true },
       sets: { type: Number},
       reps: { type: Number },
       distance: { type: Number }

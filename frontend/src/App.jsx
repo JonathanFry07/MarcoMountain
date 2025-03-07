@@ -7,7 +7,7 @@ import BottomNavbar from './components/BottomNavbar';
 import LogOut from './components/LogOut';
 import Logo from './components/Logo';
 import TrackingPage from './pages/TrackingPage';
-import TrackingWorkout from './pages/TrackingWorkout';
+import TrackingWorkoutPage from './pages/TrackingWorkoutPage';
 
 function App() {
   window['__react-beautiful-dnd-disable-dev-warnings'] = true;
@@ -38,7 +38,7 @@ function App() {
           <Route path="/" element={<HomeLayoutPage />} />
           <Route path="/workout" element={<WorkOutPage />} />
           <Route path="/tracking" element={<TrackingPage />} />
-          <Route path="/trackingWorkout/:id" element={<TrackingWorkout />} />
+          <Route path="/tracking-workout/:id" element={<TrackingWorkoutPage />} /> 
         </Routes>
       </div>
 

@@ -23,7 +23,7 @@ const WorkoutSelection = ({ onClose }) => {
   });
 
   const handleTrackClick = (id) => {
-    navigate(`/trackingWorkout/${id}`);
+    navigate(`/tracking-workout/${id}`);
   };
 
   return (

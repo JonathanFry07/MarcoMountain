@@ -42,6 +42,38 @@ export const getWorkouts = async (req, res) => {
   }
 };
 
+export const getWorkoutsById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const workouts= await Workout.findOne({id});
+
+    const exerciseIds = new Set();
+    for (let i = 0; i < workouts.length; i++) {
+      for (let j = 0; j < workouts[i].exercises.length; j++) {
+        exerciseIds.add(workouts[i].exercises[j].exerciseId);
+      }
+    }
+    
+    const exercises = await Exercise.find({ id: { $in: Array.from(exerciseIds) } });
+    
+    const exerciseMap = {};
+    exercises.forEach(ex => {
+      exerciseMap[ex.id] = ex.name;
+    });
+
+    return res.status(200).json({
+      workouts: workouts.exercises,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Error retrieving workouts",
+    });
+  }
+};
+
+
 export const getExercises = async (req, res) => {
     try {
       const exercises = await Exercise.find();
