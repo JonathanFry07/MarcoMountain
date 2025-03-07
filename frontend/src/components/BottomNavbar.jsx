@@ -9,7 +9,7 @@ const BottomNavbar = () => {
     { id: 'workout', label: 'Workout', icon: <Dumbbell />, to: '/workout' },
     { id: 'meals', label: 'Meals', icon: <Utensils /> },
     { id: 'home', label: 'Home', icon: <Home />, to: '/' },
-    { id: 'track', label: 'Track', icon: <LineChart /> },
+    { id: 'track', label: 'Track', icon: <LineChart />, to : '/tracking'},
   ];
 
   return (

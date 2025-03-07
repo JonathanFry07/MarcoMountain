@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { useAuthStore } from "@/store/authStore"
 import AddWorkoutButton from "@/components/AddWorkoutButton"
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 export default function WorkoutPage() {
   const { workouts, getWorkouts, user } = useAuthStore();
@@ -68,38 +69,62 @@ function WorkoutList({ workouts }) {
 }
 
 function WorkoutCard({ workout }) {
-    return (
-      <Card className="bg-white border border-gray-200 shadow-sm">
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-gray-800">{workout.title}</CardTitle>
-              <CardDescription className="text-gray-600">Last Completed: {new Date(workout.date).toLocaleDateString()}</CardDescription>
-            </div>
-            <Badge variant={workout.type === "cardio" ? "secondary" : "default"} className="bg-blue-500 text-white">
-              {workout.type === "cardio" ? <Heart className="h-3 w-3 mr-1" /> : <Dumbbell className="h-3 w-3 mr-1" />}
-              {workout.type.charAt(0).toUpperCase() + workout.type.slice(1)}
-            </Badge>
+  const navigate = useNavigate(); // Get the navigate function
+
+  const handleTrackClick = (id) => {
+    console.log("Tracking workout with ID:", id); // Logs the ID of the workout when the "Track" button is clicked
+    navigate(`/trackingWorkout/${id}`); // Navigate to the /trackingWorkout/:id page
+  };
+
+  return (
+    <Card className="bg-white border border-gray-200 shadow-sm">
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-gray-800">{workout.title}</CardTitle>
+            <CardDescription className="text-gray-600">
+              Last Completed: {new Date(workout.date).toLocaleDateString()}
+            </CardDescription>
           </div>
-        </CardHeader>
-        <CardContent>
-          <h3 className="font-medium text-sm mb-2 text-gray-700">Exercises:</h3>
-          <div className="space-y-2">
-            {workout.exercises.length === 0 ? (
-              <div className="text-sm text-gray-500">No exercises selected</div>
+          <Badge
+            variant={workout.type === "cardio" ? "secondary" : "default"}
+            className="bg-blue-500 text-white"
+          >
+            {workout.type === "cardio" ? (
+              <Heart className="h-3 w-3 mr-1" />
             ) : (
-              workout.exercises.map((exercise, index) => (
-                <div key={index}>
-                  {index > 0 && <Separator className="my-2 bg-gray-200" />}
-                  <ExerciseItem exercise={exercise} type={workout.type} />
-                </div>
-              ))
+              <Dumbbell className="h-3 w-3 mr-1" />
             )}
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
+            {workout.type.charAt(0).toUpperCase() + workout.type.slice(1)}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <h3 className="font-medium text-sm mb-2 text-gray-700">Exercises:</h3>
+        <div className="space-y-2">
+          {workout.exercises.length === 0 ? (
+            <div className="text-sm text-gray-500">No exercises selected</div>
+          ) : (
+            workout.exercises.map((exercise, index) => (
+              <div key={index}>
+                {index > 0 && <Separator className="my-2 bg-gray-200" />}
+                <ExerciseItem exercise={exercise} type={workout.type} />
+              </div>
+            ))
+          )}
+        </div>
+        {/* Add Track Button */}
+        <button
+          onClick={() => handleTrackClick(workout.id)} // Pass the workout id to the function
+          className="mt-4 w-full bg-teal-500 text-white py-2 rounded-md hover:bg-teal-600 transition-colors"
+        >
+          Track
+        </button>
+      </CardContent>
+    </Card>
+  );
+}
+
 
   function ExerciseItem({ exercise, type }) {
     if (type === "cardio") {
