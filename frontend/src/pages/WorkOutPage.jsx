@@ -8,11 +8,14 @@ import { useAuthStore } from "@/store/authStore"
 import AddWorkoutButton from "@/components/AddWorkoutButton"
 
 export default function WorkoutPage() {
-  const { workouts, getWorkouts } = useAuthStore();
+  const { workouts, getWorkouts, user } = useAuthStore();
   
   useEffect(() => {
-    getWorkouts();
-  }, [getWorkouts]);
+    if (user && user.email) {
+      getWorkouts(user.email);
+    }
+  }, [user, getWorkouts]);
+  
 
   return (
     <div className="relative h-screen flex flex-col">

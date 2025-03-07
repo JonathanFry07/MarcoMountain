@@ -2,8 +2,9 @@ import Workout from "../model/workout.js";
 import Exercise from "../model/exercise.js";
 
 export const getWorkouts = async (req, res) => {
+  const { email } = req.params;
   try {
-    const workouts = await Workout.find();
+    const workouts = await Workout.find({email});
 
     const exerciseIds = new Set();
     workouts.forEach(workout => {

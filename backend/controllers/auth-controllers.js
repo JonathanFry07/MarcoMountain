@@ -106,6 +106,8 @@ export const signup = async (req, res) => {
     };
   };
   export const addWorkout = async (req, res) => {
+
+    const { email } = req.params;
     const { title, type, exercises } = req.body;
   
     if (!title || !type || !exercises) {
@@ -142,6 +144,7 @@ export const signup = async (req, res) => {
   
       const newWorkout = new Workout({
         id: Math.floor(Math.random() * 1000000),  
+        email,
         title,
         type,
         date: new Date(),

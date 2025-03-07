@@ -95,10 +95,10 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  getWorkouts: async() => {
+  getWorkouts: async(email) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`${API_URL}/get-workouts`, {
+      const response = await fetch(`${API_URL}/get-workouts/${email}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -143,7 +143,7 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  createWorkout: async (title, type, exercises) => {
+  createWorkout: async (title, type, exercises, email) => {
     // Set loading state at the beginning of the request
     set({ isLoading: true, error: null });
 
@@ -190,7 +190,7 @@ export const useAuthStore = create((set) => ({
         });
 
         // Rest of your existing code remains the same
-        const response = await fetch(`${API_URL}/post-workout`, {
+        const response = await fetch(`${API_URL}/post-workout/${email}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

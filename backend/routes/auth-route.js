@@ -11,13 +11,14 @@ router.post('/login', login);
 
 router.post('/logout', logout);
 
-router.post('/post-workout', addWorkout);
+router.post('/post-workout/:email', addWorkout);
+//router.post('/post-workout', addWorkout);
 
 router.post('/post-exercise', addExercise);
 
 router.get('/check-auth', verifyToken, checkAuth);
 
-router.get('/get-workouts', getWorkouts);
+router.get('/get-workouts/:email', getWorkouts);
 
 router.get('/get-exercises', getExercises);
 

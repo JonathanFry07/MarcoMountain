@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dumbbell, Heart, DiamondPlus } from "lucide-react";
+import { Dumbbell, Heart, DiamondPlus, Trash2, Edit } from "lucide-react";
 import ExerciseSelector from "./ExerciseSelector";
 import { useAuthStore } from "@/store/authStore";
 
@@ -8,8 +8,9 @@ const AddWorkoutForm = ({ onClose }) => {
   const [type, setType] = useState("weights"); // This determines the workout type
   const [exercises, setExercises] = useState([]);
   const [exerciseSelectorVisible, setExerciseSelectorVisible] = useState(false);
+  const [editingExerciseIndex, setEditingExerciseIndex] = useState(null);
 
-  const { createWorkout, getWorkouts } = useAuthStore();
+  const { createWorkout, getWorkouts, user } = useAuthStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,9 +28,9 @@ const AddWorkoutForm = ({ onClose }) => {
     }
 
     try {
-      const result = await createWorkout(title, type, exercises);
+      const result = await createWorkout(title, type, exercises, user.email);
       console.log("Workout created successfully:", result);
-      getWorkouts();
+      getWorkouts(user.email);
       onClose();
     } catch (error) {
       console.error("Error creating workout:", error);
@@ -38,19 +39,53 @@ const AddWorkoutForm = ({ onClose }) => {
 
   // Use the parent's type to decide which fields to include.
   const addExercise = (exercise) => {
-    const orderedExercise = {
-      exerciseId: exercise.id, // Preserve exercise ID
-      name: exercise.name,
-      ...(type === "cardio"
-        ? { distance: Number(exercise.distance) } // Use distance for cardio workouts
-        : {
-            sets: Number(exercise.sets), // Use sets and reps for weights
-            reps: Number(exercise.reps),
-          }
-      ),
-    };
-    setExercises([...exercises, orderedExercise]);
+    if (editingExerciseIndex !== null) {
+      // If we're editing, replace the exercise at that index
+      const orderedExercise = {
+        exerciseId: exercise.id, // Preserve exercise ID
+        name: exercise.name,
+        ...(type === "cardio"
+          ? { distance: Number(exercise.distance) } // Use distance for cardio workouts
+          : {
+              sets: Number(exercise.sets), // Use sets and reps for weights
+              reps: Number(exercise.reps),
+            }
+        ),
+      };
+      
+      const updatedExercises = [...exercises];
+      updatedExercises[editingExerciseIndex] = orderedExercise;
+      setExercises(updatedExercises);
+      setEditingExerciseIndex(null);
+    } else {
+      // Add a new exercise
+      const orderedExercise = {
+        exerciseId: exercise.id, // Preserve exercise ID
+        name: exercise.name,
+        ...(type === "cardio"
+          ? { distance: Number(exercise.distance) } // Use distance for cardio workouts
+          : {
+              sets: Number(exercise.sets), // Use sets and reps for weights
+              reps: Number(exercise.reps),
+            }
+        ),
+      };
+      setExercises([...exercises, orderedExercise]);
+    }
     setExerciseSelectorVisible(false); // Close exercise selector after adding
+  };
+
+  // Function to remove an exercise from the list
+  const removeExercise = (index) => {
+    const updatedExercises = [...exercises];
+    updatedExercises.splice(index, 1);
+    setExercises(updatedExercises);
+  };
+
+  // Function to start editing an exercise
+  const startEditExercise = (index) => {
+    setEditingExerciseIndex(index);
+    setExerciseSelectorVisible(true);
   };
 
   return (
@@ -89,27 +124,71 @@ const AddWorkoutForm = ({ onClose }) => {
             <button
               type="button"
               className="w-full flex justify-center items-center px-4 py-2 bg-teal-600 text-white rounded hover:bg-gray-400"
-              onClick={() => setExerciseSelectorVisible(true)}
+              onClick={() => {
+                setEditingExerciseIndex(null); // Ensure we're adding, not editing
+                setExerciseSelectorVisible(true);
+              }}
             >
               Add Exercise <DiamondPlus className="ml-2" />
             </button>
           </div>
           {exerciseSelectorVisible && (
-            <ExerciseSelector selectedType={type} onAddExercise={addExercise} />
+            <div>
+              {editingExerciseIndex !== null && (
+                <div className="mb-2 bg-blue-50 p-2 rounded text-sm flex items-center">
+                  <span className="font-medium">Editing:</span> 
+                  <span className="ml-1">
+                    {exercises[editingExerciseIndex].name}
+                  </span>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setEditingExerciseIndex(null);
+                      setExerciseSelectorVisible(false);
+                    }}
+                    className="ml-auto text-gray-600 hover:text-gray-800"
+                  >
+                    Cancel Edit
+                  </button>
+                </div>
+              )}
+              <ExerciseSelector 
+                selectedType={type} 
+                onAddExercise={addExercise} 
+                initialValues={editingExerciseIndex !== null ? exercises[editingExerciseIndex] : null}
+              />
+            </div>
           )}
           <ul className="mb-4">
-            {exercises.map((ex, index) => {
-              console.log("Exercise at index", index, ex);
-              return (
-                <li key={index} className="p-2 border-b border-gray-300">
+            {exercises.map((ex, index) => (
+              <li key={index} className="p-2 border-b border-gray-300 flex justify-between items-center">
+                <span>
                   {ex.name} (
                   {type === "cardio"
                     ? `${ex.distance} km`
                     : `${ex.sets} sets, ${ex.reps} reps`}
                   )
-                </li>
-              );
-            })}
+                </span>
+                <div className="flex space-x-1">
+                  <button
+                    type="button"
+                    onClick={() => startEditExercise(index)}
+                    className="text-blue-500 hover:text-blue-700 p-1 rounded-full hover:bg-blue-100"
+                    aria-label="Edit exercise"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeExercise(index)}
+                    className="text-cyan-500 hover:text-cyan-700 p-1 rounded-full hover:bg-red-100"
+                    aria-label="Remove exercise"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </li>
+            ))}
           </ul>
           <div className="flex justify-end">
             <button
