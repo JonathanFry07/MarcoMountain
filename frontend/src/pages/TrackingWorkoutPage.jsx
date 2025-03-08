@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
-import { Plus, Minus } from "lucide-react";
+import { Plus, Minus, Replace } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const TrackingWorkoutPage = () => {
@@ -177,12 +177,13 @@ const TrackingWorkoutPage = () => {
                 <p className="text-lg font-semibold">{exercise.name}</p>
                 {workoutType === "weights" && (
                   <div className="flex space-x-2">
+                    <Replace className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800" onClick={() => console.log("Replace")}/>
                     <Minus
-                      className="w-5 h-5 text-gray-600 cursor-pointer hover:text-gray-800"
+                      className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
                       onClick={() => handleRemoveSet(exercise._id)}
                     />
                     <Plus
-                      className="w-5 h-5 text-gray-600 cursor-pointer hover:text-gray-800"
+                      className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
                       onClick={() => handleAddSet(exercise._id)}
                     />
                   </div>
