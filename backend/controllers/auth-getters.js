@@ -62,6 +62,7 @@ export const getWorkoutsById = async (req, res) => {
     });
 
     return res.status(200).json({
+      type: workouts.type,
       workouts: workouts.exercises,
     });
   } catch (error) {
