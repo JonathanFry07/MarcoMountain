@@ -22,6 +22,7 @@ const exerciseHistorySchema = new mongoose.Schema({
     },
   ],
   distance: { type: Number }, 
+  time: { type: Number }
 });
 
 const ExerciseHistory = mongoose.model("ExerciseHistory", exerciseHistorySchema);

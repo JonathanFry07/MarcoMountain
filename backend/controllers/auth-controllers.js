@@ -240,6 +240,7 @@ export const signup = async (req, res) => {
             dateCompleted: new Date(),
             name: exercise.name,
             distance: exercise.distance,
+            time: exercise.time,
           });
   
           await newExerciseHistory.save();
