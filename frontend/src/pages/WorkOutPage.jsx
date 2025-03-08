@@ -1,12 +1,12 @@
-import React, { useEffect } from "react"
-import { Dumbbell, Heart } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Separator } from "@/components/ui/separator"
-import { useAuthStore } from "@/store/authStore"
-import AddWorkoutButton from "@/components/AddWorkoutButton"
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import React, { useEffect } from "react";
+import { Dumbbell, Heart } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { useAuthStore } from "@/store/authStore";
+import AddWorkoutButton from "@/components/AddWorkoutButton";
+import { useNavigate } from "react-router-dom";
 
 export default function WorkoutPage() {
   const { workouts, getWorkouts, user } = useAuthStore();
@@ -16,7 +16,9 @@ export default function WorkoutPage() {
       getWorkouts(user.email);
     }
   }, [user, getWorkouts]);
-  
+
+  // Ensure workouts is an array, otherwise default to an empty array
+  const workoutsArray = Array.isArray(workouts) ? workouts : [];
 
   return (
     <div className="relative h-screen flex flex-col">
@@ -41,13 +43,13 @@ export default function WorkoutPage() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="all">
-              <WorkoutList workouts={workouts} />
+              <WorkoutList workouts={workoutsArray} />
             </TabsContent>
             <TabsContent value="cardio">
-              <WorkoutList workouts={workouts.filter((workout) => workout.type === "cardio")} />
+              <WorkoutList workouts={workoutsArray.filter((workout) => workout.type === "cardio")} />
             </TabsContent>
             <TabsContent value="weights">
-              <WorkoutList workouts={workouts.filter((workout) => workout.type === "weights")} />
+              <WorkoutList workouts={workoutsArray.filter((workout) => workout.type === "weights")} />
             </TabsContent>
           </Tabs>
         </div>
@@ -65,15 +67,15 @@ function WorkoutList({ workouts }) {
         <WorkoutCard key={workout.id} workout={workout} />
       ))}
     </div>
-  )
+  );
 }
 
 function WorkoutCard({ workout }) {
-  const navigate = useNavigate(); // Get the navigate function
+  const navigate = useNavigate();
 
   const handleTrackClick = (id) => {
-    console.log("Tracking workout with ID:", id); // Logs the ID of the workout when the "Track" button is clicked
-    navigate(`/tracking-workout/${id}`); // Navigate to the /trackingWorkout/:id page
+    console.log("Tracking workout with ID:", id);
+    navigate(`/tracking-workout/${id}`);
   };
 
   return (
@@ -113,9 +115,8 @@ function WorkoutCard({ workout }) {
             ))
           )}
         </div>
-        {/* Add Track Button */}
         <button
-          onClick={() => handleTrackClick(workout.id)} // Pass the workout id to the function
+          onClick={() => handleTrackClick(workout.id)}
           className="mt-4 w-full bg-teal-500 text-white py-2 rounded-md hover:bg-teal-600 transition-colors"
         >
           Track
@@ -125,29 +126,27 @@ function WorkoutCard({ workout }) {
   );
 }
 
-
-  function ExerciseItem({ exercise, type }) {
-    if (type === "cardio") {
-      return (
-        <div className="text-sm">
-          <div className="font-medium text-gray-800">{exercise.name}</div>
-          <div className="text-gray-600 grid grid-cols-2 gap-1 mt-1">
-            <div>Distance: {exercise.distance} km</div>
-            {exercise.duration && <div>Duration: {exercise.duration}</div>}
-          </div>
+function ExerciseItem({ exercise, type }) {
+  if (type === "cardio") {
+    return (
+      <div className="text-sm">
+        <div className="font-medium text-gray-800">{exercise.name}</div>
+        <div className="text-gray-600 grid grid-cols-2 gap-1 mt-1">
+          <div>Distance: {exercise.distance} km</div>
+          {exercise.duration && <div>Duration: {exercise.duration}</div>}
         </div>
-      );
-    } else {
-      return (
-        <div className="text-sm">
-          <div className="font-medium text-gray-800">{exercise.name}</div>
-          <div className="text-gray-600 grid grid-cols-3 gap-1 mt-1">
-            <div>Sets: {exercise.sets}</div>
-            <div>Reps: {exercise.reps}</div>
-            <div>{exercise.bodyPart}</div>
-          </div>
+      </div>
+    );
+  } else {
+    return (
+      <div className="text-sm">
+        <div className="font-medium text-gray-800">{exercise.name}</div>
+        <div className="text-gray-600 grid grid-cols-3 gap-1 mt-1">
+          <div>Sets: {exercise.sets}</div>
+          <div>Reps: {exercise.reps}</div>
+          <div>{exercise.bodyPart}</div>
         </div>
-      );
-    }
+      </div>
+    );
   }
-  
+}
