@@ -266,6 +266,7 @@ const TrackingWorkoutPage = () => {
                             handleInputChange(exercise._id, setIndex, "reps", e.target.value)
                           }
                           min="0"
+                          placeholder={exercise.reps || "Reps"}
                         />
                       </div>
                     ))}
@@ -305,6 +306,7 @@ const TrackingWorkoutPage = () => {
                               )
                             }
                             min="0"
+                            placeholder={exercise.reps || "Reps"}
                           />
                         </div>
                       ))}
