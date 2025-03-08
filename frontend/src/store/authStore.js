@@ -297,7 +297,6 @@ export const useAuthStore = create((set) => ({
       });
       if (response.ok) {
         set({ isLoading: false, message: "Completed Workout" });
-        return data;
       }
     } catch (error) {
       set({ isLoading: false, error: error.message });

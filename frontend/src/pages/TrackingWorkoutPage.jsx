@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { Plus, Minus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const TrackingWorkoutPage = () => {
   const { id } = useParams();
   const { workouts, getWorkoutById, finishWorkout, user } = useAuthStore();
   const [trackingData, setTrackingData] = useState({});
   const [removedDefaultSets, setRemovedDefaultSets] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (id) {
@@ -19,7 +21,23 @@ const TrackingWorkoutPage = () => {
   const exercises = workouts?.workouts || [];
 
   const handleInputChange = (exerciseId, setIndex, field, value) => {
-    const numericValue = Math.max(0, parseInt(value, 10) || ""); // Allow empty strings for cardio
+    // For cardio exercises with distance field
+    if (field === "distance") {
+      // Only set distance to 5 if the input is empty
+      const numericValue = value === "" ? "" : Math.max(0, parseFloat(value) || ""); 
+      
+      setTrackingData((prev) => ({
+        ...prev,
+        [exerciseId]: {
+          ...(prev[exerciseId] || {}),
+          distance: numericValue // Keep distance as input value or empty
+        }
+      }));
+      return;
+    }
+
+    // For weight training (existing code)
+    const numericValue = Math.max(0, parseInt(value, 10) || "");
 
     setTrackingData((prev) => {
       const exerciseData = prev[exerciseId] || {};
@@ -55,7 +73,7 @@ const TrackingWorkoutPage = () => {
         updatedAdditionalSets[additionalIndex] = { weight: "", reps: "" }; // Initialize with empty strings
       }
 
-      updatedAdditionalSets[additionalIndex][field] = value === "" ? "" : numericValue; // Handle empty string for added sets
+      updatedAdditionalSets[additionalIndex][field] = value === "" ? "" : numericValue;
 
       return {
         ...prev,
@@ -145,17 +163,17 @@ const TrackingWorkoutPage = () => {
         });
       }
 
+      // For cardio exercises, include distance
       return {
         name: exercise.name,
         sets: sets,
-        // Include distance for cardio exercises
-        ...(workoutType === "cardio" && { distance: exerciseData.distance || null })
+        ...(workoutType === "cardio" && { distance: exerciseData.distance !== undefined ? exerciseData.distance : 0 })
       };
     });
 
     // Only send the results array as the payload
     const payload = results;
-    
+
     // Save the workout type in a variable before calling finishWorkout
     const type = workoutType;
 
@@ -164,6 +182,7 @@ const TrackingWorkoutPage = () => {
       console.log("email: ", email);
       await finishWorkout(email, type, payload);
       alert("Workout completed successfully!");
+      navigate("/");
     } catch (error) {
       console.log(error);
       alert("Error completing workout.");
@@ -263,11 +282,7 @@ const TrackingWorkoutPage = () => {
                       <input
                         type="number"
                         className="border rounded px-2 py-1 w-full text-center"
-                        value={
-                          trackingData[exercise._id]?.distance !== undefined
-                            ? trackingData[exercise._id].distance
-                            : exercise.distance || ""
-                        }
+                        value={trackingData[exercise._id]?.distance || ""}
                         onChange={(e) =>
                           handleInputChange(exercise._id, 0, "distance", e.target.value)
                         }
