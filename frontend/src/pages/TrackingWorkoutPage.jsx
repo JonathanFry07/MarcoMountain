@@ -20,16 +20,52 @@ const TrackingWorkoutPage = () => {
   const workoutType = workouts?.type;
   const exercises = workouts?.workouts || [];
 
-  const handleInputChange = (exerciseId, setIndex, field, value) => {
+  // Updated to handle both default and additional set inputs.
+  const handleInputChange = (exerciseId, setIndex, field, value, isAdditional = false) => {
     const numericValue = value === "" ? "" : Math.max(0, parseFloat(value) || 0);
 
-    setTrackingData((prev) => ({
-      ...prev,
-      [exerciseId]: {
-        ...(prev[exerciseId] || {}),
-        [field]: numericValue,
-      },
-    }));
+    setTrackingData((prev) => {
+      const exerciseData = prev[exerciseId] || {};
+      if (field === "distance" || field === "time") {
+        return {
+          ...prev,
+          [exerciseId]: {
+            ...exerciseData,
+            [field]: numericValue,
+          },
+        };
+      } else {
+        if (isAdditional) {
+          const currentAdditionalSets = exerciseData.additionalSets || [];
+          const updatedAdditionalSets = [...currentAdditionalSets];
+          if (!updatedAdditionalSets[setIndex]) {
+            updatedAdditionalSets[setIndex] = { weight: "", reps: "" };
+          }
+          updatedAdditionalSets[setIndex][field] = numericValue;
+          return {
+            ...prev,
+            [exerciseId]: {
+              ...exerciseData,
+              additionalSets: updatedAdditionalSets,
+            },
+          };
+        } else {
+          const currentDefaultSets = exerciseData.sets || [];
+          const updatedDefaultSets = [...currentDefaultSets];
+          if (!updatedDefaultSets[setIndex]) {
+            updatedDefaultSets[setIndex] = { weight: "", reps: "" };
+          }
+          updatedDefaultSets[setIndex][field] = numericValue;
+          return {
+            ...prev,
+            [exerciseId]: {
+              ...exerciseData,
+              sets: updatedDefaultSets,
+            },
+          };
+        }
+      }
+    });
   };
 
   const handleAddSet = (exerciseId) => {
@@ -54,9 +90,9 @@ const TrackingWorkoutPage = () => {
 
     setTrackingData((prev) => {
       const exerciseData = prev[exerciseId] || {};
-      const originalSets = exercise.sets || 0;
       const additionalSets = exerciseData.additionalSets || [];
 
+      // If there are additional sets, remove the last one.
       if (additionalSets.length > 0) {
         return {
           ...prev,
@@ -67,11 +103,12 @@ const TrackingWorkoutPage = () => {
         };
       }
 
-      const currentSets = originalSets + (additionalSets?.length || 0);
+      // Otherwise, remove one of the default sets.
+      const currentSets = (exercise.sets || 0) + (additionalSets?.length || 0);
       if (currentSets > 0) {
-        setRemovedDefaultSets((prev) => ({
-          ...prev,
-          [exerciseId]: (prev[exerciseId] || 0) + 1,
+        setRemovedDefaultSets((prevRemoved) => ({
+          ...prevRemoved,
+          [exerciseId]: (prevRemoved[exerciseId] || 0) + 1,
         }));
       }
 
@@ -91,6 +128,7 @@ const TrackingWorkoutPage = () => {
       const visibleSetsCount = getVisibleSetsCount(exercise);
       const sets = [];
 
+      // Collect default sets.
       for (let i = 0; i < visibleSetsCount; i++) {
         sets.push({
           reps: exerciseData.sets?.[i]?.reps || 0,
@@ -98,6 +136,7 @@ const TrackingWorkoutPage = () => {
         });
       }
 
+      // Collect additional sets.
       if (exerciseData.additionalSets && exerciseData.additionalSets.length > 0) {
         exerciseData.additionalSets.forEach((set) => {
           sets.push({
@@ -158,8 +197,9 @@ const TrackingWorkoutPage = () => {
                     <span>Reps</span>
                   </div>
                   <div className="space-y-2">
+                    {/* Default sets */}
                     {[...Array(getVisibleSetsCount(exercise))].map((_, setIndex) => (
-                      <div key={setIndex} className="flex justify-between items-center space-x-2">
+                      <div key={`default-${setIndex}`} className="flex justify-between items-center space-x-2">
                         <span className="text-gray-600 w-8">{setIndex + 1}</span>
                         <input
                           type="number"
@@ -181,6 +221,45 @@ const TrackingWorkoutPage = () => {
                         />
                       </div>
                     ))}
+                    {/* Additional sets */}
+                    {trackingData[exercise._id]?.additionalSets &&
+                      trackingData[exercise._id].additionalSets.map((set, additionalIndex) => (
+                        <div key={`additional-${additionalIndex}`} className="flex justify-between items-center space-x-2">
+                          <span className="text-gray-600 w-8">
+                            {getVisibleSetsCount(exercise) + additionalIndex + 1}
+                          </span>
+                          <input
+                            type="number"
+                            className="border rounded px-2 py-1 w-20 text-center"
+                            value={set.weight}
+                            onChange={(e) =>
+                              handleInputChange(
+                                exercise._id,
+                                additionalIndex,
+                                "weight",
+                                e.target.value,
+                                true
+                              )
+                            }
+                            min="0"
+                          />
+                          <input
+                            type="number"
+                            className="border rounded px-2 py-1 w-16 text-center"
+                            value={set.reps}
+                            onChange={(e) =>
+                              handleInputChange(
+                                exercise._id,
+                                additionalIndex,
+                                "reps",
+                                e.target.value,
+                                true
+                              )
+                            }
+                            min="0"
+                          />
+                        </div>
+                      ))}
                   </div>
                 </>
               ) : (
@@ -219,7 +298,10 @@ const TrackingWorkoutPage = () => {
           ))}
 
           <div className="flex justify-end space-x-4 mt-6">
-            <button className="bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600" onClick={handleFinishWorkout}>
+            <button
+              className="bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600"
+              onClick={handleFinishWorkout}
+            >
               Finish
             </button>
           </div>
