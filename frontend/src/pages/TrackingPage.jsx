@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Utensils, Dumbbell } from "lucide-react";
+import { Utensils, Dumbbell, CalendarDays } from "lucide-react";
 import WorkoutSelection from "@/components/WorkoutSelection"; // Import the WorkoutSelection component
 
 const TrackingPage = () => {
@@ -42,6 +42,19 @@ const TrackingPage = () => {
           <div className="text-left">
             <h2 className="text-lg font-semibold text-gray-900">Track Exercise</h2>
             <p className="text-sm text-gray-600">Record your workouts</p>
+          </div>
+        </button>
+
+        {/* View recent activity Button */}
+        <button
+          className="w-full bg-white rounded-lg shadow p-4 flex items-center hover:bg-gray-50 active:bg-gray-100 transition-colors"
+        >
+          <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center mr-4">
+            <CalendarDays className="h-5 w-5 text-cyan-600" />
+          </div>
+          <div className="text-left">
+            <h2 className="text-lg font-semibold text-gray-900">View Recent activity</h2>
+            <p className="text-sm text-gray-600">See your activity log</p>
           </div>
         </button>
 
