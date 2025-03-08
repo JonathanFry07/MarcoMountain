@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { generateJWTToken } from "../utils/generateJWTToken.js";
 import Workout from "../model/workout.js";
 import Exercise from "../model/exercise.js";
+import ExerciseHistory from "../model/exerciseHistory.js";
 
 export const signup = async (req, res) => {
     const { email, name, password } = req.body;
@@ -209,3 +210,53 @@ export const signup = async (req, res) => {
       });
     }
   };
+
+  export const finishWorkout = async (req, res) => {
+    const { email, type, results } = req.body;
+  
+    try {
+      if (type === "weights") {
+        for (let exercise of results) {
+          const newExerciseHistory = new ExerciseHistory({
+            email,
+            dateCompleted: new Date(),
+            name: exercise.name,
+            sets: [],
+          });
+  
+          exercise.sets.forEach((set, index) => {
+            newExerciseHistory.sets.push({
+              reps: set.reps,
+              weight: set.weight,
+            });
+          });
+  
+          await newExerciseHistory.save();
+        }
+      } else if (type === "cardio") {
+        for (let exercise of results) {
+          const newExerciseHistory = new ExerciseHistory({
+            email,
+            dateCompleted: new Date(),
+            name: exercise.name,
+            distance: exercise.distance,
+          });
+  
+          await newExerciseHistory.save();
+        }
+      }
+  
+      return res.status(200).json({
+        success: true,
+        message: "Workout completed successfully",
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        success: false,
+        message: "Error finishing exercise",
+      });
+    }
+  };
+  
+  

@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, login, logout, checkAuth, addWorkout, addExercise } from "../controllers/auth-controllers.js";
+import { signup, login, logout, checkAuth, addWorkout, addExercise, finishWorkout } from "../controllers/auth-controllers.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 import { getExercises, getWorkouts, getWorkoutsById } from "../controllers/auth-getters.js";
 
@@ -14,6 +14,8 @@ router.post('/logout', logout);
 router.post('/post-workout/:email', addWorkout);
 
 router.post('/post-exercise', addExercise);
+
+router.post('/finish-workout', finishWorkout);
 
 router.get('/check-auth', verifyToken, checkAuth);
 

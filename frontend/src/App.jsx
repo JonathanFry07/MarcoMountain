@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import HomeLayoutPage from './pages/homeLayoutPage';
 import { useAuthStore } from './store/authStore';
 import WorkOutPage from './pages/workOutPage';
@@ -10,7 +10,6 @@ import TrackingPage from './pages/TrackingPage';
 import TrackingWorkoutPage from './pages/TrackingWorkoutPage';
 
 function App() {
-  window['__react-beautiful-dnd-disable-dev-warnings'] = true;
 
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
 

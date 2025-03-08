@@ -5,7 +5,7 @@ import { Plus, Minus } from "lucide-react";
 
 const TrackingWorkoutPage = () => {
   const { id } = useParams();
-  const { workouts, getWorkoutById } = useAuthStore();
+  const { workouts, getWorkoutById, finishWorkout, user } = useAuthStore();
   const [trackingData, setTrackingData] = useState({});
   const [removedDefaultSets, setRemovedDefaultSets] = useState({});
 
@@ -21,55 +21,50 @@ const TrackingWorkoutPage = () => {
   const handleInputChange = (exerciseId, setIndex, field, value) => {
     const numericValue = Math.max(0, parseInt(value, 10) || ""); // Allow empty strings for cardio
 
-    if (workoutType === "cardio") {
-      setTrackingData((prev) => ({
-        ...prev,
-        [exerciseId]: {
-          ...prev[exerciseId],
-          [field]: value === "" ? "" : numericValue, // Handle empty string for cardio
-        },
-      }));
-    } else {
-      setTrackingData((prev) => {
-        const exerciseData = prev[exerciseId] || {};
-        const exercise = exercises.find((e) => e._id === exerciseId);
-        const originalSets = exercise?.sets || 0;
+    setTrackingData((prev) => {
+      const exerciseData = prev[exerciseId] || {};
+      const exercise = exercises.find((e) => e._id === exerciseId);
+      const originalSets = exercise?.sets || 0;
 
-        if (setIndex < originalSets) {
-          return {
-            ...prev,
-            [exerciseId]: {
-              ...exerciseData,
-              sets: {
-                ...(exerciseData.sets || {}),
-                [setIndex]: {
-                  ...(exerciseData.sets?.[setIndex] || {}),
-                  [field]: numericValue,
-                },
-              },
-            },
-          };
-        }
+      // Ensure sets is always initialized as an array
+      if (!exerciseData.sets) {
+        exerciseData.sets = [];
+      }
 
-        const additionalSets = exerciseData.additionalSets || [];
-        const additionalIndex = setIndex - originalSets;
-        const updatedAdditionalSets = [...additionalSets];
-
-        if (!updatedAdditionalSets[additionalIndex]) {
-          updatedAdditionalSets[additionalIndex] = { weight: "", reps: "" }; // Initialize with empty strings
-        }
-
-        updatedAdditionalSets[additionalIndex][field] = value === "" ? "" : numericValue; // Handle empty string for added sets
-
+      if (setIndex < originalSets) {
         return {
           ...prev,
           [exerciseId]: {
             ...exerciseData,
-            additionalSets: updatedAdditionalSets,
+            sets: {
+              ...(exerciseData.sets || {}),
+              [setIndex]: {
+                ...(exerciseData.sets?.[setIndex] || {}),
+                [field]: numericValue,
+              },
+            },
           },
         };
-      });
-    }
+      }
+
+      const additionalSets = exerciseData.additionalSets || [];
+      const additionalIndex = setIndex - originalSets;
+      const updatedAdditionalSets = [...additionalSets];
+
+      if (!updatedAdditionalSets[additionalIndex]) {
+        updatedAdditionalSets[additionalIndex] = { weight: "", reps: "" }; // Initialize with empty strings
+      }
+
+      updatedAdditionalSets[additionalIndex][field] = value === "" ? "" : numericValue; // Handle empty string for added sets
+
+      return {
+        ...prev,
+        [exerciseId]: {
+          ...exerciseData,
+          additionalSets: updatedAdditionalSets,
+        },
+      };
+    });
   };
 
   const handleAddSet = (exerciseId) => {
@@ -123,6 +118,56 @@ const TrackingWorkoutPage = () => {
     const originalSets = exercise.sets || 0;
     const removed = removedDefaultSets[exercise._id] || 0;
     return Math.max(0, originalSets - removed);
+  };
+
+  const handleFinishWorkout = async () => {
+    // Prepare the results in the required format
+    const results = exercises.map((exercise) => {
+      const exerciseData = trackingData[exercise._id] || {};
+      const visibleSetsCount = getVisibleSetsCount(exercise);
+      const sets = [];
+
+      // Add default sets that are visible
+      for (let i = 0; i < visibleSetsCount; i++) {
+        sets.push({
+          reps: exerciseData.sets?.[i]?.reps || 0,
+          weight: exerciseData.sets?.[i]?.weight || 0
+        });
+      }
+
+      // Add additional sets
+      if (exerciseData.additionalSets && exerciseData.additionalSets.length > 0) {
+        exerciseData.additionalSets.forEach(set => {
+          sets.push({
+            reps: set.reps || 0,
+            weight: set.weight || 0
+          });
+        });
+      }
+
+      return {
+        name: exercise.name,
+        sets: sets,
+        // Include distance for cardio exercises
+        ...(workoutType === "cardio" && { distance: exerciseData.distance || null })
+      };
+    });
+
+    // Only send the results array as the payload
+    const payload = results;
+    
+    // Save the workout type in a variable before calling finishWorkout
+    const type = workoutType;
+
+    try {
+      const email = user.email;
+      console.log("email: ", email);
+      await finishWorkout(email, type, payload);
+      alert("Workout completed successfully!");
+    } catch (error) {
+      console.log(error);
+      alert("Error completing workout.");
+    }
   };
 
   return (
@@ -241,7 +286,10 @@ const TrackingWorkoutPage = () => {
             <button className="bg-gray-400 text-white px-4 py-2 rounded-md hover:bg-gray-500">
               Save
             </button>
-            <button className="bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600">
+            <button
+              className="bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600"
+              onClick={handleFinishWorkout}
+            >
               Finish
             </button>
           </div>

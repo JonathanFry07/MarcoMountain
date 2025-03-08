@@ -6,16 +6,23 @@ const exerciseHistorySchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  dateCompleted: { type: Date, default: Date.now },
-  exerciseId: { type: Number, required: true },
-  sets: { type: Number },
-  reps: { type: Number },
-  weight: { type: Number },
-  distance: { type: Number },
+  dateCompleted: { 
+    type: Date, 
+    default: Date.now 
+  },
+  name: { 
+    type: String, 
+    required: true 
+  },
+  sets: [
+    {
+      setNumber: { type: Number },
+      reps: { type: Number },     
+      weight: { type: Number },      
+    },
+  ],
+  distance: { type: Number }, 
 });
 
-const ExerciseHistory = mongoose.model(
-  "ExerciseHistory",
-  exerciseHistorySchema
-);
+const ExerciseHistory = mongoose.model("ExerciseHistory", exerciseHistorySchema);
 export default ExerciseHistory;
