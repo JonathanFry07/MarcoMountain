@@ -8,6 +8,8 @@ import LogOut from './components/LogOut';
 import Logo from './components/Logo';
 import TrackingPage from './pages/TrackingPage';
 import TrackingWorkoutPage from './pages/TrackingWorkoutPage';
+import CalendarPage from './pages/CalendarPage';
+import RecentActivityPage from './pages/CalendarPage';
 
 function App() {
 
@@ -38,6 +40,7 @@ function App() {
           <Route path="/workout" element={<WorkOutPage />} />
           <Route path="/tracking" element={<TrackingPage />} />
           <Route path="/tracking-workout/:id" element={<TrackingWorkoutPage />} /> 
+          <Route path="/recent-activity" element={<CalendarPage />} />
         </Routes>
       </div>
 

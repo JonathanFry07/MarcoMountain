@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { Utensils, Dumbbell, CalendarDays } from "lucide-react";
-import WorkoutSelection from "@/components/WorkoutSelection"; // Import the WorkoutSelection component
+import WorkoutSelection from "@/components/WorkoutSelection"; 
+import { useNavigate } from "react-router-dom";
 
 const TrackingPage = () => {
   // State to control the visibility of WorkoutSelection
   const [showWorkoutSelection, setShowWorkoutSelection] = useState(false);
+  const navigate = useNavigate();
 
   const handleTrackExerciseClick = () => {
     setShowWorkoutSelection(true); // Show WorkoutSelection when the button is clicked
@@ -12,6 +14,10 @@ const TrackingPage = () => {
 
   const handleCloseWorkoutSelection = () => {
     setShowWorkoutSelection(false); // Hide WorkoutSelection when its back button is clicked
+  };
+
+  const handleClick = () => {
+    navigate("/recent-activity");
   };
 
   return (
@@ -48,6 +54,7 @@ const TrackingPage = () => {
         {/* View recent activity Button */}
         <button
           className="w-full bg-white rounded-lg shadow p-4 flex items-center hover:bg-gray-50 active:bg-gray-100 transition-colors"
+          onClick={handleClick}
         >
           <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center mr-4">
             <CalendarDays className="h-5 w-5 text-cyan-600" />
