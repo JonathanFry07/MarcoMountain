@@ -3,56 +3,58 @@ import React from "react"
 import { cn } from "@/lib/utils"
 
 // Sample workout events data
+// Sample workout events data for February 2025
 const sampleEvents = [
   {
     id: "1",
     title: "Upper Body",
-    date: new Date(2025, 2, 10),
+    date: new Date(2025, 1, 10),
     color: "bg-red-100 text-red-700 border-red-300",
   },
   {
     id: "2",
     title: "5K Run",
-    date: new Date(2025, 2, 12),
+    date: new Date(2025, 1, 12),
     color: "bg-green-100 text-green-700 border-green-300",
   },
   {
     id: "3",
     title: "Yoga",
-    date: new Date(2025, 2, 15),
+    date: new Date(2025, 1, 15),
     color: "bg-purple-100 text-purple-700 border-purple-300",
   },
   {
     id: "4",
     title: "HIIT",
-    date: new Date(2025, 2, 18),
+    date: new Date(2025, 1, 18),
     color: "bg-amber-100 text-amber-700 border-amber-300",
   },
   {
     id: "5",
     title: "Legs",
-    date: new Date(2025, 2, 20),
+    date: new Date(2025, 1, 20),
     color: "bg-blue-100 text-blue-700 border-blue-300",
   },
   {
     id: "6",
     title: "Rest",
-    date: new Date(2025, 2, 22),
+    date: new Date(2025, 1, 22),
     color: "bg-slate-100 text-slate-700 border-slate-300",
   },
   {
     id: "7",
     title: "Swim",
-    date: new Date(2025, 2, 25),
+    date: new Date(2025, 1, 25),
     color: "bg-cyan-100 text-cyan-700 border-cyan-300",
   },
   {
     id: "8",
     title: "Core",
-    date: new Date(2025, 2, 28),
+    date: new Date(2025, 1, 28),
     color: "bg-orange-100 text-orange-700 border-orange-300",
   },
 ]
+
 
 export function CalendarGrid({ currentDate }) {
   const { daysInMonth, firstDayOfMonth, currentMonth, currentYear } = useMemo(() => {

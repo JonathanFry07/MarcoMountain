@@ -4,6 +4,7 @@ import { generateJWTToken } from "../utils/generateJWTToken.js";
 import Workout from "../model/workout.js";
 import Exercise from "../model/exercise.js";
 import ExerciseHistory from "../model/exerciseHistory.js";
+import WorkoutHistory from "../model/workoutHistory.js";
 
 export const signup = async (req, res) => {
     const { email, name, password } = req.body;
@@ -259,5 +260,32 @@ export const signup = async (req, res) => {
       });
     }
   };
+
+export const createWorkoutHistory = async (req, res) => {
+  const { email, workoutTitle, type } = req.body;
+
+  // Basic error checking for required fields
+  if (!email || !workoutTitle || !type) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: email, workoutTitle, and type are required.",
+    });
+  }
+
+  try {
+    await WorkoutHistory.create({ email, workoutTitle, type });
+    return res.status(201).json({
+      success: true,
+      message: "Workout history created successfully.",
+    });
+  } catch (error) {
+    console.error("Error creating workout history:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error creating history",
+    });
+  }
+};
+
   
   

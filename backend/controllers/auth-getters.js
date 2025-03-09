@@ -1,5 +1,6 @@
 import Workout from "../model/workout.js";
 import Exercise from "../model/exercise.js";
+import WorkoutHistory from "../model/workoutHistory.js";
 
 export const getWorkouts = async (req, res) => {
   const { email } = req.params;
@@ -97,6 +98,32 @@ export const getExercises = async (req, res) => {
       return res.status(500).json({
         success: false,
         message: "Error retrieving exercises",
+      });
+    }
+  };
+
+  export const getWorkoutHistory = async (req, res) => {
+    const { email } = req.params; 
+  
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required parameter: email.",
+      });
+    }
+  
+    try {
+      const histories = await WorkoutHistory.find({ email }).select("-_id -__v");;
+  
+      return res.status(200).json({
+        success: true,
+        data: histories,
+      });
+    } catch (error) {
+      console.error("Error fetching workout history:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error fetching workout history.",
       });
     }
   };
