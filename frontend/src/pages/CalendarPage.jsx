@@ -18,17 +18,24 @@ const CalendarPage = () => {
     const today = new Date();
     const startOfWeek = today.getDate() - today.getDay();
     const endOfWeek = startOfWeek + 6;
-
+  
     const weekStartDate = new Date(today.setDate(startOfWeek));
     const weekEndDate = new Date(today.setDate(endOfWeek));
-
+  
+    // Convert dateCompleted to a Date object and check for rest days
     const workoutsThisWeek = workoutHistory.filter((workout) => {
-      const workoutDate = new Date(workout.dateCompleted);
-      return workoutDate >= weekStartDate && workoutDate <= weekEndDate;
+      const workoutDate = new Date(workout.dateCompleted); // Convert to Date object
+      return (
+        workoutDate >= weekStartDate &&
+        workoutDate <= weekEndDate &&
+        workout.type !== "rest" // Exclude rest days
+      );
     });
-
+  
+    // Return the number of workouts excluding rest days
     return workoutsThisWeek.length;
   };
+  
 
   const workoutsThisWeek = calculateWorkoutsThisWeek();
 

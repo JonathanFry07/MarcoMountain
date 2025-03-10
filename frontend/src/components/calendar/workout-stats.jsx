@@ -1,18 +1,21 @@
-import { Calendar, TrendingUp } from "lucide-react"
-import React, { useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useAuthStore } from "@/store/authStore"
+import { Calendar, TrendingUp } from "lucide-react";
+import React, { useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuthStore } from "@/store/authStore";
 
 function getActiveStreak(workoutHistory) {
+  // Filter out rest days
+  const filteredWorkoutHistory = workoutHistory.filter(event => event.type !== "rest");
+
   const workoutDates = new Set(
-    workoutHistory.map(event => {
+    filteredWorkoutHistory.map(event => {
       const d = new Date(event.dateCompleted);
-      return d.toISOString().split('T')[0];
+      return d.toISOString().split("T")[0];
     })
   );
 
   const loginDate = new Date();
-  const loginDayStr = loginDate.toISOString().split('T')[0];
+  const loginDayStr = loginDate.toISOString().split("T")[0];
 
   if (!workoutDates.has(loginDayStr)) {
     return 0;
@@ -21,7 +24,7 @@ function getActiveStreak(workoutHistory) {
   let streak = 0;
   let currentDate = new Date(loginDate);
   while (true) {
-    const formattedDate = currentDate.toISOString().split('T')[0];
+    const formattedDate = currentDate.toISOString().split("T")[0];
     if (workoutDates.has(formattedDate)) {
       streak++;
       currentDate.setDate(currentDate.getDate() - 1);
@@ -33,6 +36,9 @@ function getActiveStreak(workoutHistory) {
 }
 
 function getMonthlyWorkoutComparison(workoutHistory) {
+  // Filter out rest days
+  const filteredWorkoutHistory = workoutHistory.filter(event => event.type !== "rest");
+
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth(); // 0-indexed (0 = January)
   const currentYear = currentDate.getFullYear();
@@ -50,7 +56,7 @@ function getMonthlyWorkoutComparison(workoutHistory) {
   let currentCount = 0;
   let lastCount = 0;
 
-  workoutHistory.forEach(event => {
+  filteredWorkoutHistory.forEach(event => {
     const eventDate = new Date(event.dateCompleted);
     const eventMonth = eventDate.getMonth();
     const eventYear = eventDate.getFullYear();
@@ -62,9 +68,8 @@ function getMonthlyWorkoutComparison(workoutHistory) {
     }
   });
 
-  return { currentCount, lastCount};
+  return { currentCount, lastCount };
 }
-
 
 export function WorkoutStats() {
   const { user, getWorkoutHistory, workoutHistory } = useAuthStore();
@@ -75,13 +80,14 @@ export function WorkoutStats() {
     }
   }, [user, getWorkoutHistory]);
 
+  // Get active streak and monthly comparison data
   const activeStreak = getActiveStreak(workoutHistory || []);
   const { currentCount, lastCount } =
     getMonthlyWorkoutComparison(workoutHistory || []);
 
   return (
     <div className="flex gap-3 mb-3">
-        {/* Workouts This Month Card */}
+      {/* Workouts This Month Card */}
       <Card className="flex-1">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Workouts This Month</CardTitle>
@@ -92,7 +98,7 @@ export function WorkoutStats() {
           <p className="text-xs text-muted-foreground">{lastCount} workouts last month</p>
         </CardContent>
       </Card>
-      
+
       {/* Active Streak Card */}
       <Card className="flex-1">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -101,7 +107,6 @@ export function WorkoutStats() {
         </CardHeader>
         <CardContent>
           <div className="text-xl font-bold">{activeStreak} days</div>
-         {/* <p className="text-xs text-muted-foreground">Personal best: 14 days</p> */}
         </CardContent>
       </Card>
     </div>
