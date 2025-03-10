@@ -15,8 +15,6 @@ const AddWorkoutForm = ({ onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    console.log("Exercises:", exercises)
-
     if (!title.trim()) {
       console.error("Error: Workout title is required.")
       return

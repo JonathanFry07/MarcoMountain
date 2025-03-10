@@ -18,10 +18,7 @@ function App() {
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
-
-  console.log(user);
-  console.log(isAuthenticated);
-
+  
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       {/* Fixed Top Logo */}

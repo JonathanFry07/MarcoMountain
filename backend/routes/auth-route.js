@@ -17,7 +17,7 @@ router.post('/post-exercise', addExercise);
 
 router.post('/finish-workout', finishWorkout);
 
-router.post('/create-workout-history', createWorkoutHistory);
+router.post('/post-workout-history', createWorkoutHistory);
 
 router.post('/post-rest-day', addRestDay);
 

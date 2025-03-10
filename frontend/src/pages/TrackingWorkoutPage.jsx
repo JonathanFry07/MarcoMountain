@@ -7,7 +7,7 @@ import ExerciseSelector from "@/components/ExerciseSelector";
 
 const TrackingWorkoutPage = () => {
   const { id } = useParams();
-  const { workouts, getWorkoutById, finishWorkout, user } = useAuthStore();
+  const { workouts, getWorkoutById, finishWorkout, user, createWorkoutHistory } = useAuthStore();
   const [trackingData, setTrackingData] = useState({});
   const [removedDefaultSets, setRemovedDefaultSets] = useState({});
   // Local copy of exercises so we can update them on replacement.
@@ -30,6 +30,8 @@ const TrackingWorkoutPage = () => {
   }, [workouts]);
 
   const workoutType = workouts?.type;
+  const workoutTItle = workouts?.title;
+
   // Use the local exercises array for rendering.
   const exercises = localExercises;
 
@@ -164,6 +166,8 @@ const TrackingWorkoutPage = () => {
 
     try {
       await finishWorkout(user.email, workoutType, results);
+      const resultHistory = await createWorkoutHistory(user.email, workoutTItle, workoutType);
+      console.log("history created", resultHistory);
       alert("Workout completed successfully!");
       navigate("/");
     } catch (error) {
@@ -172,18 +176,13 @@ const TrackingWorkoutPage = () => {
     }
   };
 
-  // Called when an exercise is selected from ExerciseSelector.
-  // It replaces the exercise at the replacement target with the newly picked exercise,
-  // preserving the default set count (and associated tracking data).
   const handleReplaceExercise = (newExerciseData) => {
     if (replacementTarget) {
       const { index, oldExercise } = replacementTarget;
-      // Build a new exercise object based on the picked exercise,
-      // preserving the sets count from the exercise being replaced.
       const updatedExercise = {
         ...newExerciseData,
-        _id: newExerciseData.id, // Ensure _id is set for consistency.
-        sets: oldExercise.sets,   // Preserve the same number of default sets.
+        _id: newExerciseData.id,
+        sets: oldExercise.sets,   
       };
 
       // Update the local copy of exercises.
