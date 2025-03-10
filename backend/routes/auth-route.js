@@ -1,5 +1,5 @@
 import express from "express";
-import { signup, login, logout, checkAuth, addWorkout, addExercise, finishWorkout, createWorkoutHistory, addRestDay } from "../controllers/auth-controllers.js";
+import { signup, login, logout, checkAuth, addWorkout, addExercise, finishWorkout, createWorkoutHistory, addRestDay, setWorkoutTarget } from "../controllers/auth-controllers.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 import { getExercises, getWorkoutHistory, getWorkouts, getWorkoutsById } from "../controllers/auth-getters.js";
 
@@ -20,6 +20,8 @@ router.post('/finish-workout', finishWorkout);
 router.post('/post-workout-history', createWorkoutHistory);
 
 router.post('/post-rest-day', addRestDay);
+
+router.post('/post-workout-target', setWorkoutTarget);
 
 router.get('/check-auth', verifyToken, checkAuth);
 

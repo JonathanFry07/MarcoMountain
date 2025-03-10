@@ -314,5 +314,26 @@ export const addRestDay = async (req, res) => {
   }
 };
 
-  
-  
+export const setWorkoutTarget = async (req, res) => {
+  try {
+    const { email, workoutTarget } = req.body;
+
+    if (!email || typeof workoutTarget !== "number") {
+      return res.status(400).json({ message: "Invalid input" });
+    }
+
+    const user = await User.findOneAndUpdate(
+      { email },
+      { workoutTarget },
+      { new: true } // Return updated user
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ message: "Workout target updated", user });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

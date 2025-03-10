@@ -347,4 +347,40 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
+  addRestDay: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`${API_URL}/post-rest-day`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email})
+      });
+      if (response.ok) {
+        set({ isLoading: false, message: "Create history" });
+      }
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  setWorkoutTarget: async (email, workoutTarget) => {
+    set({ isLoading: true, error: null});
+    try {
+      const response = await fetch(`${API_URL}/post-workout-target`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email, workoutTarget})
+      });
+      if (response.ok) {
+        set({ isLoading: false, message: "set workout target" });
+      }
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  }
 }));

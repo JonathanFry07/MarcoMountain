@@ -17,6 +17,10 @@ const UserSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
+  workoutTarget: {
+    type: Number,
+    default: 4
+  }
 });
 
 const User = mongoose.model("User", UserSchema);
