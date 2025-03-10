@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { CalendarIcon, ChevronLeft, ChevronRight, Menu } from "lucide-react"
 import { CalendarGrid } from "@/components/calendar/calendar-grix"
 import { MobileSidebar } from "@/components/calendar/mobile-sidebar"
@@ -6,9 +6,11 @@ import { WorkoutStats } from "@/components/calendar/workout-stats"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { useAuthStore } from "@/store/authStore"
 
 const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date())
+  const {isLoading, getWorkoutHistory, workoutHistory, user } = useAuthStore();
 
   const navigateToToday = () => {
     setCurrentDate(new Date())
@@ -19,6 +21,12 @@ const CalendarPage = () => {
     newDate.setMonth(newDate.getMonth() + direction)
     setCurrentDate(newDate)
   }
+
+  useEffect(()=>{
+    if (user && user.email){
+      getWorkoutHistory(user.email);
+    }
+  }, [user, getWorkoutHistory]);
 
   const monthYear = currentDate.toLocaleString("default", { month: "long", year: "numeric" })
 
@@ -61,7 +69,7 @@ const CalendarPage = () => {
               </Button>
             </div>
           </div>
-          <CalendarGrid currentDate={currentDate} />
+          <CalendarGrid currentDate={currentDate} workoutHistory={workoutHistory} />
         </Card>
       </main>
     </div>
