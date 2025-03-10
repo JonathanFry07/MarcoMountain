@@ -305,6 +305,25 @@ export const useAuthStore = create((set) => ({
       return null;
     }
   },
+  createWorkoutHistory: async (email, workoutTitle, type) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`${API_URL}/post-workout-history`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email, workoutTitle, type})
+      });
+      if (response.ok) {
+        set({ isLoading: false, message: "Create history" });
+      }
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      console.log(error);
+      return null;
+    }
+  },
   getWorkoutHistory: async (email) => {
     set({ isLoading: true, error: null, workoutHistory: [] });
     try {

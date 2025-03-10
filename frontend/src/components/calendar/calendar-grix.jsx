@@ -3,16 +3,16 @@ import React from "react"
 import { cn } from "@/lib/utils"
 
 export function CalendarGrid({ currentDate, workoutHistory }) {
-  console.log("Workout history: ", workoutHistory);
 
-  // Convert string dates to Date objects
   const processedWorkoutHistory = workoutHistory.map((event) => ({
     ...event,
     date: new Date(event.dateCompleted), // Convert string to Date
     title: event.workoutTitle, // Use workoutTitle instead of title
-    color: event.type === "weights"
-      ? "bg-red-100 text-red-700 border-red-300"
-      : "bg-green-100 text-green-700 border-green-300", // Example colors
+    color: event.type === "rest"
+      ? "bg-slate-300 text-slate-700 border-slate-300"
+      : event.type === "weights"
+        ? "bg-red-300 text-red-700 border-red-300"
+        : "bg-green-300 text-green-700 border-green-300", // for other types like cardio
   }));
 
   const { daysInMonth, firstDayOfMonth, currentMonth, currentYear } = useMemo(() => {

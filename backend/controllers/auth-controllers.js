@@ -287,5 +287,32 @@ export const createWorkoutHistory = async (req, res) => {
   }
 };
 
+export const addRestDay = async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields:  are required.",
+    });
+  }
+  try {
+    await WorkoutHistory.create({
+      email,
+      workoutTitle: "Rest Day",
+      type: "rest"
+    });
+    return res.status(201).json({
+      success: true,
+      message: "Rest day created successfully.",
+    });
+  } catch (error) {
+    console.error("Error creating rest day:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error creating rest day",
+    });
+  }
+};
+
   
   

@@ -17,7 +17,7 @@ const workoutHistorySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  type: { type: String, enum: ["cardio", "weights"], required: true },
+  type: { type: String, enum: ["cardio", "weights", "rest"], required: true },
 });
 
 const WorkoutHistory = mongoose.model("WorkoutHistory", workoutHistorySchema);

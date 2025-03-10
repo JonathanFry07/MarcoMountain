@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAuthStore } from "@/store/authStore"
 
 function getActiveStreak(workoutHistory) {
-  // Convert all workout dates to a standardized 'YYYY-MM-DD' format.
   const workoutDates = new Set(
     workoutHistory.map(event => {
       const d = new Date(event.dateCompleted);
@@ -12,23 +11,19 @@ function getActiveStreak(workoutHistory) {
     })
   );
 
-  // Use the current date as the login date.
   const loginDate = new Date();
   const loginDayStr = loginDate.toISOString().split('T')[0];
 
-  // If there's no workout on the login day, return 0.
   if (!workoutDates.has(loginDayStr)) {
     return 0;
   }
 
-  // Count consecutive days starting from today.
   let streak = 0;
   let currentDate = new Date(loginDate);
   while (true) {
     const formattedDate = currentDate.toISOString().split('T')[0];
     if (workoutDates.has(formattedDate)) {
       streak++;
-      // Move to the previous day.
       currentDate.setDate(currentDate.getDate() - 1);
     } else {
       break;
