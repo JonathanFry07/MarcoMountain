@@ -1,6 +1,7 @@
 import Workout from "../model/workout.js";
 import Exercise from "../model/exercise.js";
 import WorkoutHistory from "../model/workoutHistory.js";
+import CustomExercise from "../model/customExercise.js";
 
 export const getWorkouts = async (req, res) => {
   const { email } = req.params;
@@ -102,6 +103,34 @@ export const getExercises = async (req, res) => {
       });
     }
   };
+
+  export const getCustomExercises = async (req, res) => {
+    const { email } = req.params;
+    try {
+      const exercises = await CustomExercise.find({email});
+  
+      const filteredExercises = exercises.map(exercise => {
+        const { id, name, type, description, bodyPart } = exercise._doc;
+        const result = { id, name, type, description };
+        if (bodyPart !== "") {
+          result.bodyPart = bodyPart;
+        }
+        return result;
+      });
+  
+      return res.status(200).json({
+        success: true,
+        exercises: filteredExercises,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        success: false,
+        message: "Error retrieving exercises",
+      });
+    }
+  };
+
 
   export const getWorkoutHistory = async (req, res) => {
     const { email } = req.params; 

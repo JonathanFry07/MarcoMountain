@@ -5,6 +5,7 @@ import Workout from "../model/workout.js";
 import Exercise from "../model/exercise.js";
 import ExerciseHistory from "../model/exerciseHistory.js";
 import WorkoutHistory from "../model/workoutHistory.js";
+import CustomExercise from "../model/customExercise.js";
 
 export const signup = async (req, res) => {
     const { email, name, password } = req.body;
@@ -211,6 +212,51 @@ export const signup = async (req, res) => {
       });
     }
   };
+
+  export const addCustomExercise = async (req, res) => {
+    const { email ,name, type, description, bodyPart } = req.body;
+  
+    if (!name || !type || (type === 'weights' && !bodyPart)) {
+      return res.status(400).json({
+        success: false,
+        message: "Required fields missing: name, type, and for weights, a non-empty bodyPart",
+      });
+    }
+  
+    if (type !== 'cardio' && type !== 'weights') {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid type. Must be either 'cardio' or 'weights'",
+      });
+    }
+  
+    try {
+      const newExercise = new CustomExercise({
+        email,
+        id: Math.floor(Math.random() * 1000000), 
+        name,
+        type,
+        description: description || "",
+        bodyPart: type === 'weights' ? bodyPart : "", 
+        dateAdded: new Date(),
+      });
+  
+      await newExercise.save();
+  
+      return res.status(201).json({
+        success: true,
+        message: "Exercise created successfully",
+        exercise: newExercise,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+        success: false,
+        message: "Error creating exercise",
+      });
+    }
+  };
+
 
   export const finishWorkout = async (req, res) => {
     const { email, type, results } = req.body;

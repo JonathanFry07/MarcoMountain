@@ -3,136 +3,167 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/store/authStore';
+import { StepBack } from 'lucide-react';
 
-const ExerciseSelector = ({ selectedType, onAddExercise }) => {
-    const { exercises, getExercises } = useAuthStore();
+const ExerciseSelector = ({ selectedType, onAddExercise, onClose }) => {
+  const { user, exercises, getExercises, getCustomExercises, createCustomExercise } = useAuthStore();
 
-    useEffect(() => {
-        getExercises();  // Fetch exercises when the component mounts
-    }, [getExercises]);
+  useEffect(() => {
+    if (exercises.length === 0) {
+      getExercises();
+      if (user?.email) {
+        getCustomExercises(user.email);
+      }
+    }
+  }, [getExercises, getCustomExercises, user]);
 
-    const [selectedBodyPart, setSelectedBodyPart] = useState('');
-    const [selectedExercise, setSelectedExercise] = useState('');
-    const [distance, setDistance] = useState(''); // Start as an empty string
-    const [sets, setSets] = useState('');
-    const [reps, setReps] = useState('');
+  const [selectedBodyPart, setSelectedBodyPart] = useState('');
+  const [selectedExercise, setSelectedExercise] = useState('');
+  const [distance, setDistance] = useState('');
+  const [sets, setSets] = useState('');
+  const [reps, setReps] = useState('');
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [newExerciseName, setNewExerciseName] = useState('');
+  const [newExerciseDescription, setNewExerciseDescription] = useState('');
+  const [newExerciseBodyPart, setNewExerciseBodyPart] = useState('');
+  const [creationError, setCreationError] = useState('');
 
-    // Filter out unique types and body parts based on selected workout type (cardio or weights)
-    const bodyParts = selectedType === 'weights' 
-        ? [...new Set(exercises.filter(ex => ex.type === 'weights').map(ex => ex.bodyPart))] 
-        : [];
+  const bodyParts = selectedType === 'weights'
+    ? [...new Set(exercises.filter(ex => ex.type === 'weights').map(ex => ex.bodyPart))]
+    : [];
 
-    // Filter exercises based on selected type and body part (for weights)
-    const filteredExercises = exercises.filter(ex => 
-        ex.type === selectedType && 
-        (selectedType === 'cardio' || ex.bodyPart === selectedBodyPart)
+  const filteredExercises = exercises.filter(ex =>
+    ex.type === selectedType &&
+    (selectedType === 'cardio' || ex.bodyPart === selectedBodyPart)
+  );
+
+  const handleCreateExercise = async () => {
+    if (!newExerciseName) {
+      setCreationError("Name is required");
+      return;
+    }
+    if (selectedType === 'weights' && !newExerciseBodyPart) {
+      setCreationError("Body part is required for weights exercises");
+      return;
+    }
+
+    const created = await createCustomExercise(
+      user.email,
+      newExerciseName,
+      selectedType,
+      newExerciseDescription,
+      newExerciseBodyPart
     );
 
-    const handleBodyPartChange = (bodyPart) => {
-        setSelectedBodyPart(bodyPart);
-        setSelectedExercise(''); // Reset exercise selection
-        setSets('');
-        setReps('');
-    };
+    if (created) {
+      setNewExerciseName('');
+      setNewExerciseDescription('');
+      setNewExerciseBodyPart('');
+      setCreationError('');
+      setIsCreatingNew(false);
+      getExercises();
+    } else {
+      setCreationError("Failed to create exercise");
+    }
+  };
 
-    const handleAddExercise = () => {
-        if (selectedExercise) {
-            const exercise = exercises.find(ex => ex.name === selectedExercise);
-            
-            const exerciseData = {
-                id: exercise.id,
-                name: selectedExercise,
-                ...(selectedType === 'cardio' 
-                    ? { distance: Number.parseFloat(distance) || 0 }  // Parse distance as a number
-                    : { sets: Number(sets), reps: Number(reps) }
-                )
-            };
-
-            console.log('Exercise Data:', exerciseData); // Debug log to verify values
-            onAddExercise(exerciseData);
-        }
-    };
-
-    return (
-        <div className="space-y-4 p-4">
-            {selectedType === 'weights' && (
-                <div>
-                    <Label>Body Part</Label>
-                    <Select value={selectedBodyPart} onValueChange={handleBodyPartChange}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select Body Part" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {bodyParts.map(bodyPart => (
-                                <SelectItem key={bodyPart} value={bodyPart}>
-                                    {bodyPart.charAt(0).toUpperCase() + bodyPart.slice(1)}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            )}
-
-            <div>
-                <Label>Exercise</Label>
-                <Select value={selectedExercise} onValueChange={setSelectedExercise}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select Exercise" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {filteredExercises.map(exercise => (
-                            <SelectItem key={exercise.id} value={exercise.name}>
-                                {exercise.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-            </div>
-
-            {selectedType === 'cardio' && selectedExercise && (
-                <div>
-                    <Label>Distance (km)</Label>
-                    <Input 
-                        type="number" 
-                        value={distance} 
-                        onChange={(e) => setDistance(e.target.value)} 
-                        placeholder="Enter distance" 
-                    />
-                </div>
-            )}
-
-            {selectedType === 'weights' && selectedExercise && (
-                <div className="flex space-x-4">
-                    <div className="w-1/2">
-                        <Label>Sets</Label>
-                        <Input 
-                            type="number" 
-                            value={sets} 
-                            onChange={(e) => setSets(e.target.value)} 
-                            placeholder="Enter sets" 
-                        />
-                    </div>
-                    <div className="w-1/2">
-                        <Label>Reps</Label>
-                        <Input 
-                            type="number" 
-                            value={reps} 
-                            onChange={(e) => setReps(e.target.value)} 
-                            placeholder="Enter reps" 
-                        />
-                    </div>
-                </div>
-            )}
-
-            <button 
-                onClick={handleAddExercise} 
-                className="mt-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 w-full"
-                disabled={!selectedExercise}
+  return (
+    <div className="space-y-4 p-4">
+      {isCreatingNew ? (
+        <div className="space-y-4">
+          <Label>New Exercise Name</Label>
+          <Input
+            type="text"
+            value={newExerciseName}
+            onChange={(e) => setNewExerciseName(e.target.value)}
+            placeholder="Enter exercise name"
+          />
+          <Label>Description</Label>
+          <Input
+            type="text"
+            value={newExerciseDescription}
+            onChange={(e) => setNewExerciseDescription(e.target.value)}
+            placeholder="Enter description (optional)"
+          />
+          {selectedType === 'weights' && (
+            <>
+              <Label>Body Part</Label>
+              <Select value={newExerciseBodyPart} onValueChange={setNewExerciseBodyPart}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Body Part" />
+                </SelectTrigger>
+                <SelectContent>
+                  {bodyParts.map((bodyPart) => (
+                    <SelectItem key={bodyPart} value={bodyPart}>
+                      {bodyPart.charAt(0).toUpperCase() + bodyPart.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </>
+          )}
+          {creationError && <p className="text-red-500 text-sm">{creationError}</p>}
+          <div className="flex space-x-4">
+            <button
+              onClick={handleCreateExercise}
+              className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 flex-1"
             >
-                Add to Workout
+              Save Exercise
             </button>
+            <button
+              onClick={() => setIsCreatingNew(false)}
+              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 flex-1"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
-    );
+      ) : (
+        <>
+          {selectedType === 'weights' && (
+            <div>
+              <Label>Body Part</Label>
+              <Select value={selectedBodyPart} onValueChange={setSelectedBodyPart}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Body Part" />
+                </SelectTrigger>
+                <SelectContent>
+                  {bodyParts.map(bodyPart => (
+                    <SelectItem key={bodyPart} value={bodyPart}>
+                      {bodyPart.charAt(0).toUpperCase() + bodyPart.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          <div>
+            <Label>Exercise</Label>
+            <Select value={selectedExercise} onValueChange={setSelectedExercise}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Exercise" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredExercises.map(exercise => (
+                  <SelectItem key={exercise.id} value={exercise.name}>
+                    {exercise.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <button
+            onClick={() => setIsCreatingNew(true)}
+            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full"
+          >
+            Create New Exercise
+          </button>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default ExerciseSelector;

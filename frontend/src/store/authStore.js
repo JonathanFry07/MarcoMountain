@@ -165,6 +165,34 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
+  getCustomExercises: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`${API_URL}/get-custom-exercises/${email}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      // Merge custom exercises into the existing exercises array.
+      set((state) => ({
+        isLoading: false,
+        exercises: [...state.exercises, ...data.exercises],
+      }));
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  
   createWorkout: async (title, type, exercises, email) => {
     // Set loading state at the beginning of the request
     set({ isLoading: true, error: null });
@@ -261,6 +289,59 @@ export const useAuthStore = create((set) => ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          name,
+          type,
+          description: description || "",
+          bodyPart: type === "weights" ? bodyPart : "",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        set({ isLoading: false, message: "Exercise Created Successfully" });
+        return data;
+      }
+
+      set({
+        isLoading: false,
+        error: data.message || "Failed to create exercise",
+      });
+      return null;
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      console.log(error);
+      return null;
+    }
+  },
+  createCustomExercise: async (email, name, type, description, bodyPart) => {
+    set({ isLoading: true, error: null });
+
+    if (!name || !type || (type === "weights" && !bodyPart)) {
+      set({
+        isLoading: false,
+        error:
+          "Required fields missing: name, type, and for weights, a non-empty bodyPart",
+      });
+      return null;
+    }
+
+    if (type !== "cardio" && type !== "weights") {
+      set({
+        isLoading: false,
+        error: "Invalid type. Must be either 'cardio' or 'weights'",
+      });
+      return null;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/post-custom-exercise`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
           name,
           type,
           description: description || "",
