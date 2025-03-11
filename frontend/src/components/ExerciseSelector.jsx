@@ -60,7 +60,7 @@ const ExerciseSelector = ({ selectedType, onAddExercise }) => {
       setNewExerciseBodyPart('');
       setCreationError('');
       setIsCreatingNew(false);
-      getExercises();
+      getCustomExercises(user.email);
     } else {
       setCreationError("Failed to create exercise");
     }
@@ -83,7 +83,7 @@ const ExerciseSelector = ({ selectedType, onAddExercise }) => {
   };
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 p-4 rounded-3xl">
       {isCreatingNew ? (
         <div className="space-y-4">
           <Label>New Exercise Name</Label>
@@ -92,6 +92,7 @@ const ExerciseSelector = ({ selectedType, onAddExercise }) => {
             value={newExerciseName}
             onChange={(e) => setNewExerciseName(e.target.value)}
             placeholder="Enter exercise name"
+            required
           />
           <Label>Description</Label>
           <Input
@@ -99,6 +100,7 @@ const ExerciseSelector = ({ selectedType, onAddExercise }) => {
             value={newExerciseDescription}
             onChange={(e) => setNewExerciseDescription(e.target.value)}
             placeholder="Enter description (optional)"
+            required
           />
           {selectedType === 'weights' && (
             <>
@@ -124,6 +126,12 @@ const ExerciseSelector = ({ selectedType, onAddExercise }) => {
               className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 flex-1"
             >
               Save Exercise
+            </button>
+            <button
+              onClick={() => setIsCreatingNew(false)}
+              className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 flex-1"
+            >
+              Cancel
             </button>
           </div>
         </div>
@@ -164,30 +172,28 @@ const ExerciseSelector = ({ selectedType, onAddExercise }) => {
           </div>
 
           {selectedType === 'weights' && (
-            <>
-              <div className="mt-4 flex space-x-4">
-                <div className="flex-1">
-                  <Label>Sets</Label>
-                  <Input
-                    type="number"
-                    value={sets}
-                    onChange={(e) => setSets(e.target.value)}
-                    placeholder="Sets"
-                    min="1"
-                  />
-                </div>
-                <div className="flex-1">
-                  <Label>Reps</Label>
-                  <Input
-                    type="number"
-                    value={reps}
-                    onChange={(e) => setReps(e.target.value)}
-                    placeholder="Reps"
-                    min="1"
-                  />
-                </div>
+            <div className="mt-4 flex space-x-4">
+              <div className="flex-1">
+                <Label>Sets</Label>
+                <Input
+                  type="number"
+                  value={sets}
+                  onChange={(e) => setSets(e.target.value)}
+                  placeholder="Sets"
+                  min="1"
+                />
               </div>
-            </>
+              <div className="flex-1">
+                <Label>Reps</Label>
+                <Input
+                  type="number"
+                  value={reps}
+                  onChange={(e) => setReps(e.target.value)}
+                  placeholder="Reps"
+                  min="1"
+                />
+              </div>
+            </div>
           )}
 
           {selectedType === 'cardio' && (
@@ -205,9 +211,16 @@ const ExerciseSelector = ({ selectedType, onAddExercise }) => {
 
           <button
             onClick={handleAddExerciseClick}
-            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full"
+            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded-xl hover:bg-blue-600 w-full transition-all duration-300 shadow-md hover:shadow-lg"
           >
             Add Exercise
+          </button>
+
+          <button
+            className="mt-2 px-4 py-2 bg-cyan-400 text-white rounded-xl hover:bg-cyan-500 w-full transition-all duration-300 shadow-md hover:shadow-lg"
+            onClick={() => setIsCreatingNew(true)} // Toggle to create new exercise
+          >
+            Create New Exercise
           </button>
         </>
       )}
