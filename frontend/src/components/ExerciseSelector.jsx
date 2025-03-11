@@ -3,9 +3,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/store/authStore';
-import { StepBack } from 'lucide-react';
 
-const ExerciseSelector = ({ selectedType, onAddExercise, onClose }) => {
+const ExerciseSelector = ({ selectedType, onAddExercise }) => {
   const { user, exercises, getExercises, getCustomExercises, createCustomExercise } = useAuthStore();
 
   useEffect(() => {
@@ -29,7 +28,7 @@ const ExerciseSelector = ({ selectedType, onAddExercise, onClose }) => {
   const [creationError, setCreationError] = useState('');
 
   const bodyParts = selectedType === 'weights'
-    ? [...new Set(exercises.filter(ex => ex.type === 'weights').map(ex => ex.bodyPart))] 
+    ? [...new Set(exercises.filter(ex => ex.type === 'weights').map(ex => ex.bodyPart))]
     : [];
 
   const filteredExercises = exercises.filter(ex =>
@@ -67,7 +66,6 @@ const ExerciseSelector = ({ selectedType, onAddExercise, onClose }) => {
     }
   };
 
-  // Function to handle adding the exercise with reps and sets.
   const handleAddExerciseClick = () => {
     if (selectedType === 'weights') {
       onAddExercise({
@@ -82,7 +80,6 @@ const ExerciseSelector = ({ selectedType, onAddExercise, onClose }) => {
         time: distance ? '15' : '', // Just an example of default time for cardio
       });
     }
-    onClose();  // Close the exercise selector after adding.
   };
 
   return (
@@ -127,12 +124,6 @@ const ExerciseSelector = ({ selectedType, onAddExercise, onClose }) => {
               className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 flex-1"
             >
               Save Exercise
-            </button>
-            <button
-              onClick={() => setIsCreatingNew(false)}
-              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 flex-1"
-            >
-              Cancel
             </button>
           </div>
         </div>
@@ -217,13 +208,6 @@ const ExerciseSelector = ({ selectedType, onAddExercise, onClose }) => {
             className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full"
           >
             Add Exercise
-          </button>
-
-          <button
-            onClick={onClose}
-            className="mt-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 w-full"
-          >
-            Cancel
           </button>
         </>
       )}

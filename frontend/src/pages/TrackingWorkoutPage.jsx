@@ -41,10 +41,6 @@ const TrackingWorkoutPage = () => {
     setExerciseSelectorVisible(false); // Hide the ExerciseSelector after adding exercise
   };
 
-  const closeSelector = () => {
-    setExerciseSelectorVisible(false);
-  }
-
   // Updates input values for default sets, additional sets, and cardio fields
   const handleInputChange = (exerciseId, setIndex, field, value, isAdditional = false) => {
     const numericValue = value === "" ? "" : Math.max(0, parseFloat(value) || 0);
@@ -192,7 +188,7 @@ const TrackingWorkoutPage = () => {
       const updatedExercise = {
         ...newExerciseData,
         _id: newExerciseData.id,
-        sets: oldExercise.sets,   
+        sets: oldExercise.sets,
       };
 
       // Update the local copy of exercises.
@@ -243,9 +239,12 @@ const TrackingWorkoutPage = () => {
                     <Replace
                       className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
                       onClick={() =>
-                        setReplacementTarget({ index, oldExercise: exercise })
+                        setReplacementTarget((prev) =>
+                          prev?.index === index ? null : { index, oldExercise: exercise }
+                        )
                       }
                     />
+
                     <Minus
                       className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
                       onClick={() => handleRemoveSet(exercise._id)}
@@ -255,7 +254,7 @@ const TrackingWorkoutPage = () => {
                       onClick={() => handleAddSet(exercise._id)}
                     />
                     <Trash
-                      className="w-5 h-5 text-red-600 cursor-pointer hover:text-red-800"
+                      className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
                       onClick={() => handleRemoveExercise(exercise._id)} // Remove exercise
                     />
                   </div>
@@ -371,10 +370,9 @@ const TrackingWorkoutPage = () => {
               {/* If this exercise is flagged for replacement, show the ExerciseSelector toggle */}
               {replacementTarget && replacementTarget.index === index && (
                 <div className="mt-4 p-4 border rounded bg-gray-100">
-                  <ExerciseSelector 
-                    selectedType="weights" 
-                    onAddExercise={handleReplaceExercise} 
-                    onClose={closeSelector}
+                  <ExerciseSelector
+                    selectedType="weights"
+                    onAddExercise={handleReplaceExercise}
                   />
                 </div>
               )}
@@ -386,7 +384,7 @@ const TrackingWorkoutPage = () => {
           <div className="flex justify-center items-center">
             <button
               className="bg-cyan-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-cyan-700 transition"
-              onClick={() => setExerciseSelectorVisible(true)}
+              onClick={() => setExerciseSelectorVisible(!exerciseSelectorVisible)}
             >
               Add Exercise
             </button>
