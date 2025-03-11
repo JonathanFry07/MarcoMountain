@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
-import { Plus, Minus, Replace } from "lucide-react";
+import { Plus, Minus, Replace, Trash } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ExerciseSelector from "@/components/ExerciseSelector";
 
@@ -10,11 +10,8 @@ const TrackingWorkoutPage = () => {
   const { workouts, getWorkoutById, finishWorkout, user, createWorkoutHistory } = useAuthStore();
   const [trackingData, setTrackingData] = useState({});
   const [removedDefaultSets, setRemovedDefaultSets] = useState({});
-  // Local copy of exercises so we can update them on replacement.
   const [localExercises, setLocalExercises] = useState([]);
-  // Holds the index and current exercise object for which replacement is active.
   const [replacementTarget, setReplacementTarget] = useState(null);
-  // Manage visibility of exercise selector
   const [exerciseSelectorVisible, setExerciseSelectorVisible] = useState(false);
   const navigate = useNavigate();
 
@@ -24,7 +21,6 @@ const TrackingWorkoutPage = () => {
     }
   }, [id]);
 
-  // When workouts change, store a local copy of the workouts array.
   useEffect(() => {
     if (workouts && workouts.workouts) {
       setLocalExercises(workouts.workouts);
@@ -34,10 +30,22 @@ const TrackingWorkoutPage = () => {
   const workoutType = workouts?.type;
   const workoutTItle = workouts?.title;
 
-  // Use the local exercises array for rendering.
   const exercises = localExercises;
 
-  // Updates input values for default sets, additional sets, and cardio fields.
+  // Define the handleAddExercise function
+  const handleAddExercise = (newExerciseData) => {
+    setLocalExercises((prevExercises) => [
+      ...prevExercises,
+      newExerciseData
+    ]);
+    setExerciseSelectorVisible(false); // Hide the ExerciseSelector after adding exercise
+  };
+
+  const closeSelector = () => {
+    setExerciseSelectorVisible(false);
+  }
+
+  // Updates input values for default sets, additional sets, and cardio fields
   const handleInputChange = (exerciseId, setIndex, field, value, isAdditional = false) => {
     const numericValue = value === "" ? "" : Math.max(0, parseFloat(value) || 0);
     setTrackingData((prev) => {
@@ -209,6 +217,18 @@ const TrackingWorkoutPage = () => {
     }
   };
 
+  // Handle removal of an exercise
+  const handleRemoveExercise = (exerciseId) => {
+    setLocalExercises((prevExercises) =>
+      prevExercises.filter((exercise) => exercise._id !== exerciseId)
+    );
+    setTrackingData((prev) => {
+      const newTrackingData = { ...prev };
+      delete newTrackingData[exerciseId];
+      return newTrackingData;
+    });
+  };
+
   return (
     <div className="max-w-xl mx-auto p-4">
       {exercises.length > 0 ? (
@@ -233,6 +253,10 @@ const TrackingWorkoutPage = () => {
                     <Plus
                       className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
                       onClick={() => handleAddSet(exercise._id)}
+                    />
+                    <Trash
+                      className="w-5 h-5 text-red-600 cursor-pointer hover:text-red-800"
+                      onClick={() => handleRemoveExercise(exercise._id)} // Remove exercise
                     />
                   </div>
                 )}
@@ -350,6 +374,7 @@ const TrackingWorkoutPage = () => {
                   <ExerciseSelector 
                     selectedType="weights" 
                     onAddExercise={handleReplaceExercise} 
+                    onClose={closeSelector}
                   />
                 </div>
               )}
@@ -386,7 +411,6 @@ const TrackingWorkoutPage = () => {
           </div>
         </div>
       ) : (
-        // Blank page if no exercises (removed h-screen)
         <div className="bg-white shadow rounded p-6 flex flex-col justify-center items-center">
           <button
             className="bg-cyan-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-cyan-700 transition"

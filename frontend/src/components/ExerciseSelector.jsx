@@ -29,7 +29,7 @@ const ExerciseSelector = ({ selectedType, onAddExercise, onClose }) => {
   const [creationError, setCreationError] = useState('');
 
   const bodyParts = selectedType === 'weights'
-    ? [...new Set(exercises.filter(ex => ex.type === 'weights').map(ex => ex.bodyPart))]
+    ? [...new Set(exercises.filter(ex => ex.type === 'weights').map(ex => ex.bodyPart))] 
     : [];
 
   const filteredExercises = exercises.filter(ex =>
@@ -65,6 +65,24 @@ const ExerciseSelector = ({ selectedType, onAddExercise, onClose }) => {
     } else {
       setCreationError("Failed to create exercise");
     }
+  };
+
+  // Function to handle adding the exercise with reps and sets.
+  const handleAddExerciseClick = () => {
+    if (selectedType === 'weights') {
+      onAddExercise({
+        name: selectedExercise,
+        sets: sets,
+        reps: reps,
+      });
+    } else {
+      onAddExercise({
+        name: selectedExercise,
+        distance: distance,
+        time: distance ? '15' : '', // Just an example of default time for cardio
+      });
+    }
+    onClose();  // Close the exercise selector after adding.
   };
 
   return (
@@ -154,11 +172,58 @@ const ExerciseSelector = ({ selectedType, onAddExercise, onClose }) => {
             </Select>
           </div>
 
+          {selectedType === 'weights' && (
+            <>
+              <div className="mt-4 flex space-x-4">
+                <div className="flex-1">
+                  <Label>Sets</Label>
+                  <Input
+                    type="number"
+                    value={sets}
+                    onChange={(e) => setSets(e.target.value)}
+                    placeholder="Sets"
+                    min="1"
+                  />
+                </div>
+                <div className="flex-1">
+                  <Label>Reps</Label>
+                  <Input
+                    type="number"
+                    value={reps}
+                    onChange={(e) => setReps(e.target.value)}
+                    placeholder="Reps"
+                    min="1"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {selectedType === 'cardio' && (
+            <div className="mt-4">
+              <Label>Distance (in km)</Label>
+              <Input
+                type="number"
+                value={distance}
+                onChange={(e) => setDistance(e.target.value)}
+                placeholder="Enter distance"
+                min="0"
+              />
+            </div>
+          )}
+
           <button
-            onClick={() => setIsCreatingNew(true)}
+            onClick={handleAddExerciseClick}
             className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 w-full"
           >
-            Create New Exercise
+            Add Exercise
+          </button>
+
+          <button
+            onClick={onClose}
+            className="mt-2 px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 w-full"
+          >
+            Cancel
           </button>
         </>
       )}
