@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
-import { Plus, Minus, Replace } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Plus, Minus, Replace, Trash2 } from "lucide-react";
 import ExerciseSelector from "@/components/ExerciseSelector";
 
 const TrackingWorkoutPage = () => {
@@ -10,10 +9,9 @@ const TrackingWorkoutPage = () => {
   const { workouts, getWorkoutById, finishWorkout, user, createWorkoutHistory } = useAuthStore();
   const [trackingData, setTrackingData] = useState({});
   const [removedDefaultSets, setRemovedDefaultSets] = useState({});
-  // Local copy of exercises so we can update them on replacement.
   const [localExercises, setLocalExercises] = useState([]);
-  // Holds the index and current exercise object for which replacement is active.
   const [replacementTarget, setReplacementTarget] = useState(null);
+  const [exerciseSelectorVisible, setExerciseSelectorVisible] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,7 +20,6 @@ const TrackingWorkoutPage = () => {
     }
   }, [id]);
 
-  // When workouts change, store a local copy of the workouts array.
   useEffect(() => {
     if (workouts && workouts.workouts) {
       setLocalExercises(workouts.workouts);
@@ -30,12 +27,9 @@ const TrackingWorkoutPage = () => {
   }, [workouts]);
 
   const workoutType = workouts?.type;
-  const workoutTItle = workouts?.title;
-
-  // Use the local exercises array for rendering.
+  const workoutTitle = workouts?.title;
   const exercises = localExercises;
 
-  // Updates input values for default sets, additional sets, and cardio fields.
   const handleInputChange = (exerciseId, setIndex, field, value, isAdditional = false) => {
     const numericValue = value === "" ? "" : Math.max(0, parseFloat(value) || 0);
     setTrackingData((prev) => {
@@ -105,7 +99,6 @@ const TrackingWorkoutPage = () => {
     setTrackingData((prev) => {
       const exerciseData = prev[exerciseId] || {};
       const additionalSets = exerciseData.additionalSets || [];
-      // Remove the last additional set if present.
       if (additionalSets.length > 0) {
         return {
           ...prev,
@@ -115,7 +108,6 @@ const TrackingWorkoutPage = () => {
           },
         };
       }
-      // Otherwise, update the removed count for default sets.
       const currentSets = (exercise.sets || 0) + (additionalSets?.length || 0);
       if (currentSets > 0) {
         setRemovedDefaultSets((prevRemoved) => ({
@@ -138,14 +130,12 @@ const TrackingWorkoutPage = () => {
       const exerciseData = trackingData[exercise._id] || {};
       const visibleSetsCount = getVisibleSetsCount(exercise);
       const sets = [];
-      // Collect default sets.
       for (let i = 0; i < visibleSetsCount; i++) {
         sets.push({
           reps: exerciseData.sets?.[i]?.reps || 0,
           weight: exerciseData.sets?.[i]?.weight || 0,
         });
       }
-      // Collect additional sets.
       if (exerciseData.additionalSets && exerciseData.additionalSets.length > 0) {
         exerciseData.additionalSets.forEach((set) => {
           sets.push({
@@ -166,7 +156,7 @@ const TrackingWorkoutPage = () => {
 
     try {
       await finishWorkout(user.email, workoutType, results);
-      const resultHistory = await createWorkoutHistory(user.email, workoutTItle, workoutType);
+      const resultHistory = await createWorkoutHistory(user.email, workoutTitle, workoutType);
       console.log("history created", resultHistory);
       alert("Workout completed successfully!");
       navigate("/");
@@ -182,17 +172,15 @@ const TrackingWorkoutPage = () => {
       const updatedExercise = {
         ...newExerciseData,
         _id: newExerciseData.id,
-        sets: oldExercise.sets,   
+        sets: oldExercise.sets,
       };
 
-      // Update the local copy of exercises.
       setLocalExercises((prev) => {
         const newExercises = [...prev];
         newExercises[index] = updatedExercise;
         return newExercises;
       });
 
-      // Transfer tracking data from the replaced exercise key to the new one.
       setTrackingData((prev) => {
         const newTrackingData = { ...prev };
         if (newTrackingData[oldExercise._id]) {
@@ -202,9 +190,27 @@ const TrackingWorkoutPage = () => {
         return newTrackingData;
       });
 
-      // Close the replacement toggle.
       setReplacementTarget(null);
     }
+  };
+
+  const handleAddExercise = (newExerciseData) => {
+    const newExercise = {
+      ...newExerciseData,
+      _id: newExerciseData.id,
+      sets: newExerciseData.sets || 0,
+    };
+    setLocalExercises((prev) => [...prev, newExercise]);
+    setExerciseSelectorVisible(false);
+  };
+
+  const handleRemoveExercise = (exerciseId) => {
+    setLocalExercises((prev) => prev.filter((exercise) => exercise._id !== exerciseId));
+    setTrackingData((prev) => {
+      const newData = { ...prev };
+      delete newData[exerciseId];
+      return newData;
+    });
   };
 
   return (
@@ -216,24 +222,28 @@ const TrackingWorkoutPage = () => {
             <div key={exercise._id || index} className="mb-6">
               <div className="flex justify-between items-center">
                 <p className="text-lg font-semibold">{exercise.name}</p>
-                {workoutType === "weights" && (
-                  <div className="flex space-x-2">
-                    <Replace
-                      className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
-                      onClick={() =>
-                        setReplacementTarget({ index, oldExercise: exercise })
-                      }
-                    />
-                    <Minus
-                      className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
-                      onClick={() => handleRemoveSet(exercise._id)}
-                    />
-                    <Plus
-                      className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
-                      onClick={() => handleAddSet(exercise._id)}
-                    />
-                  </div>
-                )}
+                <div className="flex space-x-2">
+                  {workoutType === "weights" && (
+                    <>
+                      <Replace
+                        className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
+                        onClick={() => setReplacementTarget({ index, oldExercise: exercise })}
+                      />
+                      <Minus
+                        className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
+                        onClick={() => handleRemoveSet(exercise._id)}
+                      />
+                      <Plus
+                        className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
+                        onClick={() => handleAddSet(exercise._id)}
+                      />
+                    </>
+                  )}
+                  <Trash2
+                    className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
+                    onClick={() => handleRemoveExercise(exercise._id)}
+                  />
+                </div>
               </div>
 
               {workoutType === "weights" ? (
@@ -244,7 +254,6 @@ const TrackingWorkoutPage = () => {
                     <span>Reps</span>
                   </div>
                   <div className="space-y-2">
-                    {/* Render default set inputs */}
                     {[...Array(getVisibleSetsCount(exercise))].map((_, setIndex) => (
                       <div key={`default-${setIndex}`} className="flex justify-between items-center space-x-2">
                         <span className="text-gray-600 w-8">{setIndex + 1}</span>
@@ -269,7 +278,6 @@ const TrackingWorkoutPage = () => {
                         />
                       </div>
                     ))}
-                    {/* Render additional set inputs */}
                     {trackingData[exercise._id]?.additionalSets &&
                       trackingData[exercise._id].additionalSets.map((set, additionalIndex) => (
                         <div key={`additional-${additionalIndex}`} className="flex justify-between items-center space-x-2">
@@ -342,12 +350,11 @@ const TrackingWorkoutPage = () => {
                 </>
               )}
 
-              {/* If this exercise is flagged for replacement, show the ExerciseSelector toggle */}
               {replacementTarget && replacementTarget.index === index && (
                 <div className="mt-4 p-4 border rounded bg-gray-100">
-                  <ExerciseSelector 
-                    selectedType="weights" 
-                    onAddExercise={handleReplaceExercise} 
+                  <ExerciseSelector
+                    selectedType={workoutType === "weights" ? "weights" : "cardio"}
+                    onAddExercise={handleReplaceExercise}
                   />
                 </div>
               )}
@@ -355,6 +362,24 @@ const TrackingWorkoutPage = () => {
               {index !== exercises.length - 1 && <hr className="my-4 border-gray-300" />}
             </div>
           ))}
+
+          <div className="flex justify-center items-center">
+            <button
+              className="bg-cyan-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-cyan-700 transition"
+              onClick={() => setExerciseSelectorVisible(true)}
+            >
+              Add Exercise
+            </button>
+          </div>
+
+          {exerciseSelectorVisible && (
+            <div className="mt-4 p-4 border rounded bg-gray-100">
+              <ExerciseSelector
+                selectedType={workoutType === "weights" ? "weights" : "cardio"}
+                onAddExercise={handleAddExercise}
+              />
+            </div>
+          )}
 
           <div className="flex justify-end space-x-4 mt-6">
             <button
@@ -366,7 +391,24 @@ const TrackingWorkoutPage = () => {
           </div>
         </div>
       ) : (
-        <p className="text-center text-gray-500">Loading workout data...</p>
+        // Blank page if no exercises (removed h-screen)
+        <div className="bg-white shadow rounded p-6 flex flex-col justify-center items-center">
+          <button
+            className="bg-cyan-400 text-white px-4 py-2 rounded-lg shadow-md hover:bg-cyan-700 transition"
+            onClick={() => setExerciseSelectorVisible(true)}
+          >
+            Add Exercise
+          </button>
+
+          {exerciseSelectorVisible && (
+            <div className="mt-4 p-4 border rounded bg-gray-100">
+              <ExerciseSelector
+                selectedType={workoutType === "weights" ? "weights" : "cardio"}
+                onAddExercise={handleAddExercise}
+              />
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
