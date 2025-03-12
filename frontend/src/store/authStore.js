@@ -11,6 +11,7 @@ export const useAuthStore = create((set) => ({
   workouts: [],
   exercises: [],
   workoutHistory: [],
+  exerciseHistory: [],
 
   signup: async (email, name, password) => {
     set({ isLoading: true, error: null });
@@ -137,6 +138,29 @@ export const useAuthStore = create((set) => ({
       const data = await response.json();
 
       set({ isLoading: false, workouts: data });
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  getExerciseHistory: async (email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`${API_URL}/get-exercise-history/${email}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      set({ isLoading: false, exerciseHistory: data.history });
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;

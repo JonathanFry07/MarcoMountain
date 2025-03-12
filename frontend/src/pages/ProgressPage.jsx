@@ -1,9 +1,16 @@
 // src/ProgressPage.js
-import React from "react";
+import React, { useEffect} from "react";
 import { Dumbbell, Heart } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useAuthStore } from "@/store/authStore";
+import WeightProgress from "@/components/progress/weightProgress";
+import VolumeProgress from "@/components/progress/volumeProgress";
+import RepRangeAnalysis from "@/components/progress/repRange";
 
 function ProgressPage() {
+
+  const { user, exerciseHistory, getExerciseHistory } = useAuthStore();
+
   return (
    <>
     <div className="flex min-h-screen flex-col">
@@ -29,18 +36,25 @@ function ProgressPage() {
                 </TabsList>
 
                 <TabsContent value="strength" className="mt-6 space-y-6">
-                  <div className="grid gap-6">
+                  <div className="grid gap-6 bg-white p-2">
                     <h2 className="text-xl font-semibold">Weight Progress</h2>
                     <div className="grid gap-6 md:grid-cols-2">
+                      <WeightProgress />
                     </div>
                   </div>
 
-                  <div className="grid gap-6">
+                  <div className="grid gap-6 bg-white p-2">
                     <h2 className="text-xl font-semibold">Volume Analysis</h2>
+                    <div className="grid gap-6 md:grid-cols-2">
+                     <VolumeProgress />
+                    </div>
                   </div>
 
-                  <div className="grid gap-6">
+                  <div className="grid gap-6 bg-white p-2">
                     <h2 className="text-xl font-semibold">Rep Range Analysis</h2>
+                    <div className="grid gap-6 md:grid-cols-2">
+                     <RepRangeAnalysis />
+                    </div>
                   </div>
                 </TabsContent>
 

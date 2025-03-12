@@ -2,6 +2,7 @@ import Workout from "../model/workout.js";
 import Exercise from "../model/exercise.js";
 import WorkoutHistory from "../model/workoutHistory.js";
 import CustomExercise from "../model/customExercise.js";
+import ExerciseHistory from "../model/exerciseHistory.js";
 
 export const getWorkouts = async (req, res) => {
   const { email } = req.params;
@@ -157,4 +158,45 @@ export const getExercises = async (req, res) => {
       });
     }
   };
+
+  export const getExerciseHistory = async (req, res) => {
+    const { email } = req.params;
+    try {
+        const history = await ExerciseHistory.find({ email }).select("-_id -__v");
+        
+        // Group exercises together by name
+        const groupedHistory = {};
+        
+        history.forEach((entry) => {
+            const { name, sets, distance, time, dateCompleted } = entry;
+            
+            if (!groupedHistory[name]) {
+                groupedHistory[name] = [];
+            }
+            
+            const record = { name, dateCompleted };
+            
+            if (sets && sets.length > 0) {
+                record.sets = sets;
+            } else {
+                record.distance = distance || 0;
+                record.time = time || 0;
+            }
+            
+            groupedHistory[name].push(record);
+        });
+        
+        return res.status(200).json({
+            success: true,
+            history: Object.values(groupedHistory).flat(),
+        });
+    } catch (error) {
+        console.error("Error fetching exercise history:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching exercise history.",
+        });
+    }
+};
+
   
