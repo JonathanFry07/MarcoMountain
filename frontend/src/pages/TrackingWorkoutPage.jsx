@@ -1,14 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
-import { Plus, Minus, Replace, Trash, ChartBarDecreasing } from "lucide-react";
+import { Plus, Minus, Replace, Trash, ChartBar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ExerciseSelector from "@/components/ExerciseSelector";
-import RepRangeAnalysis from "@/components/progress/repRange";
-import WeightProgress from "@/components/progress/weightProgress";
-import VolumeProgress from "@/components/progress/volumeProgress";
-import DistanceAnalysis from "@/components/progress/distanceAnalysis";
-import PaceAnalysis from "@/components/progress/paceAnalysis";
+import ExerciseHistory from "@/components/exerciseHistory";
 
 const TrackingWorkoutPage = () => {
   const { id } = useParams();
@@ -18,10 +14,7 @@ const TrackingWorkoutPage = () => {
   const [localExercises, setLocalExercises] = useState([]);
   const [replacementTarget, setReplacementTarget] = useState(null);
   const [exerciseSelectorVisible, setExerciseSelectorVisible] = useState(false);
-  const [graphVisible, setGraphVisible] = useState(false);
-  const [filteredHistory, setFilteredHistory] = useState([]);
-  const [cardioHistory, setCardioHistory] = useState([]);
-  const [selectedAnalysisType, setSelectedAnalysisType] = useState("Weight");
+  const [historyVisibility, setHistoryVisibility] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,18 +34,6 @@ const TrackingWorkoutPage = () => {
       getExerciseHistory(user.email);
     }
   }, [user, exerciseHistory, getExerciseHistory]);
-
-  const handleDataForGraph = (exerciseName) => {
-    if (!exerciseHistory || !Array.isArray(exerciseHistory)) {
-      console.warn("No exercise history available.");
-      return;
-    }
-    const filteredHistory2 = exerciseHistory.filter(
-      (record) => record.name === exerciseName
-    );
-    setFilteredHistory(filteredHistory2);
-    setGraphVisible(!graphVisible);
-  };
 
   const workoutType = workouts?.type;
   const workoutTItle = workouts?.title;
@@ -252,6 +233,13 @@ const TrackingWorkoutPage = () => {
     });
   };
 
+  const toggleHistory = (exerciseId) => {
+    setHistoryVisibility((prev) => ({
+      ...prev,
+      [exerciseId]: !prev[exerciseId],
+    }));
+  };
+
   return (
     <div className="max-w-xl mx-auto p-4">
       {exercises.length > 0 ? (
@@ -263,9 +251,9 @@ const TrackingWorkoutPage = () => {
                 <p className="text-lg font-semibold">{exercise.name}</p>
                 {workoutType === "weights" && (
                   <div className="flex space-x-2">
-                    <ChartBarDecreasing
+                    <ChartBar
                       className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
-                      onClick={() => handleDataForGraph(exercise.name)}
+                      onClick={() => toggleHistory(exercise._id)}
                     />
                     <Replace
                       className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
@@ -294,7 +282,7 @@ const TrackingWorkoutPage = () => {
 
               {workoutType === "weights" ? (
                 <>
-                  <div className="flex justify-between text-gray-700 text-sm font-medium mt-2 mb-1">
+                  <div className="flex justify-between card text-gray-700 text-sm font-medium mt-2 mb-1">
                     <span>Set</span>
                     <span>Weight (kg)</span>
                     <span>Reps</span>
@@ -366,24 +354,8 @@ const TrackingWorkoutPage = () => {
                         </div>
                       ))}
                   </div>
-                  <div className="p-4">
-                    {graphVisible && (
-                      <>
-                        <select
-                          value={selectedAnalysisType}
-                          onChange={(e) => setSelectedAnalysisType(e.target.value)}
-                          className="w-full sm:w-[180px] p-2 border rounded mb-4"
-                        >
-                          <option value="Weight">Weight</option>
-                          <option value="Rep-Range">Rep-Range</option>
-                          <option value="Volume">Volume</option>
-                        </select>
-
-                        {selectedAnalysisType === "Weight" && <WeightProgress data={filteredHistory} showDropdown={false} />}
-                        {selectedAnalysisType === "Rep-Range" && <RepRangeAnalysis data={filteredHistory} showDropdown={false} />}
-                        {selectedAnalysisType === "Volume" && <VolumeProgress data={filteredHistory} showDropdown={false} />}
-                      </>
-                    )}
+                  <div>
+                  {historyVisibility[exercise._id] && <ExerciseHistory />}
                   </div>
                 </>
               ) : (
