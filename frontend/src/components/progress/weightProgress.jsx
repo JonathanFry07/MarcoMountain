@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -13,59 +13,34 @@ import { format } from "date-fns";
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-// Sample API response with workout history
-const apiResponse = {
-  success: true,
-  history: [
-    {
-      name: "Bench Press",
-      dateCompleted: "2025-03-11T15:47:40.163Z",
-      sets: [
-        { reps: 4, weight: 60 },
-        { reps: 4, weight: 60 },
-        { reps: 3, weight: 60 },
-      ],
-    },
-    {
-      name: "Bench Press",
-      dateCompleted: "2025-03-11T18:48:10.270Z",
-      sets: [
-        { reps: 4, weight: 60 },
-        { reps: 4, weight: 60 },
-        { reps: 4, weight: 70 },
-      ],
-    },
-    {
-      name: "Incline Bench Press",
-      dateCompleted: "2025-03-11T15:47:40.199Z",
-      sets: [
-        { reps: 8, weight: 50 },
-        { reps: 8, weight: 50 },
-        { reps: 7, weight: 50 },
-      ],
-    },
-  ],
-};
+const WeightProgress = ({ data }) => {
+  if (!data) {
+    return <p>No data available</p>;
+  }
 
-const WeightProgress = () => {
-  const filteredHistory = apiResponse.history.filter((item) => item.sets);
-  const exerciseNames = Array.from(new Set(filteredHistory.map((item) => item.name)));
+  const filteredData = data.filter((item) => item.sets); // Filter out cardio exercises (without sets)
+  const exerciseNames = Array.from(new Set(filteredData.map((item) => item.name)));
+
+  // Default selected exercise to the first available exercise
   const [selectedExercise, setSelectedExercise] = useState(exerciseNames[0]);
 
-  // Filter sessions for the selected exercise
-  const filteredSessions = filteredHistory.filter(
+  useEffect(() => {
+    // If the exerciseNames array is not empty, set the default exercise on mount
+    if (exerciseNames.length > 0 && !selectedExercise) {
+      setSelectedExercise(exerciseNames[0]);
+    }
+  }, [exerciseNames, selectedExercise]);
+
+  const filteredSessions = filteredData.filter(
     (session) => session.name === selectedExercise
   );
 
-  // Create one x-axis label per session using just the date
   const xLabels = filteredSessions.map((session) =>
     format(new Date(session.dateCompleted), "MMM dd")
   );
 
-  // Determine the maximum number of sets across all sessions
   const maxSets = Math.max(...filteredSessions.map((s) => s.sets.length));
 
-  // Define colors for differentiating sets
   const datasetColors = [
     "rgba(54, 162, 235, 0.5)",
     "rgba(255, 99, 132, 0.5)",
@@ -73,7 +48,6 @@ const WeightProgress = () => {
     "rgba(75, 192, 192, 0.5)",
   ];
 
-  // Build one dataset per set index so that each session contributes a weight for that set (or null if not available)
   const datasets = [];
   for (let i = 0; i < maxSets; i++) {
     const dataForSet = filteredSessions.map((session) =>
@@ -88,7 +62,7 @@ const WeightProgress = () => {
     });
   }
 
-  const data = {
+  const chartData = {
     labels: xLabels,
     datasets: datasets,
   };
@@ -102,6 +76,9 @@ const WeightProgress = () => {
     scales: {
       x: { title: { display: true, text: "Workout Sessions" } },
       y: { title: { display: true, text: "Weight (kg)" }, beginAtZero: true },
+    },
+    animation: {
+      duration: 300, // Set animation duration to 300ms for quicker transitions
     },
   };
 
@@ -119,7 +96,7 @@ const WeightProgress = () => {
         ))}
       </select>
       {filteredSessions.length > 0 ? (
-        <Bar data={data} options={options} />
+        <Bar data={chartData} options={options} />
       ) : (
         <p>No chart data available for {selectedExercise}</p>
       )}

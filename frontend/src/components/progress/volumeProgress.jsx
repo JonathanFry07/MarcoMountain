@@ -1,11 +1,11 @@
-import React, { useState } from "react";
-import { Line } from "react-chartjs-2"; // Importing Line chart
+import React, { useState, useEffect } from "react";
+import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   LineElement,
   CategoryScale,
   LinearScale,
-  PointElement, // Register point element for line chart
+  PointElement,
   Tooltip,
   Legend,
 } from "chart.js";
@@ -16,53 +16,30 @@ ChartJS.register(
   LineElement,
   CategoryScale,
   LinearScale,
-  PointElement,  // Point element to render points in a line chart
+  PointElement,
   Tooltip,
   Legend
 );
 
-// Sample API response
-const apiResponse = {
-  success: true,
-  history: [
-    {
-      name: "Bench Press",
-      dateCompleted: "2025-03-11T15:47:40.163Z",
-      sets: [
-        { reps: 4, weight: 60 },
-        { reps: 4, weight: 60 },
-        { reps: 3, weight: 60 },
-      ],
-    },
-    {
-      name: "Bench Press",
-      dateCompleted: "2025-03-11T18:48:10.270Z",
-      sets: [
-        { reps: 4, weight: 60 },
-        { reps: 4, weight: 60 },
-        { reps: 4, weight: 70 },
-      ],
-    },
-    {
-      name: "Incline Bench Press",
-      dateCompleted: "2025-03-11T15:47:40.199Z",
-      sets: [
-        { reps: 8, weight: 50 },
-        { reps: 8, weight: 50 },
-        { reps: 7, weight: 50 },
-      ],
-    },
-  ],
-};
+const VolumeProgress = ({ data }) => {
+  if (!data) {
+    return <p>No data available</p>;
+  }
 
-// VolumeProgress component for displaying volume charts
-const VolumeProgress = () => {
-  const filteredHistory = apiResponse.history.filter((item) => item.sets);
-  const exerciseNames = Array.from(new Set(filteredHistory.map((item) => item.name)));
+  const filteredData = data.filter((item) => item.sets); // Exclude cardio exercises (no sets)
+  const exerciseNames = Array.from(new Set(filteredData.map((item) => item.name)));
+
+  // Default selected exercise to the first available exercise
   const [selectedExercise, setSelectedExercise] = useState(exerciseNames[0]);
 
+  useEffect(() => {
+    if (exerciseNames.length > 0 && !selectedExercise) {
+      setSelectedExercise(exerciseNames[0]);
+    }
+  }, [exerciseNames, selectedExercise]);
+
   // Filter sessions based on selected exercise
-  const filteredSessions = filteredHistory.filter(
+  const filteredSessions = filteredData.filter(
     (session) => session.name === selectedExercise
   );
 
@@ -77,16 +54,16 @@ const VolumeProgress = () => {
   });
 
   // Dataset for volume graph
-  const data = {
+  const chartData = {
     labels: sessionVolumes.map((entry) => entry.date),
     datasets: [
       {
-        type: "line",  // Line chart type
+        type: "line", // Line chart type
         label: "Volume per Session (Weight × Reps)",
         data: sessionVolumes.map((entry) => entry.totalVolume),
-        borderColor: "rgba(54, 162, 235, 0.7)",  // Line color
-        backgroundColor: "rgba(54, 162, 235, 0.2)",  // Line fill color
-        fill: true,  // Filling the area under the line
+        borderColor: "rgba(54, 162, 235, 0.7)", // Line color
+        backgroundColor: "rgba(54, 162, 235, 0.2)", // Line fill color
+        fill: true, // Filling the area under the line
       },
     ],
   };
@@ -98,13 +75,17 @@ const VolumeProgress = () => {
       x: { title: { display: true, text: "Workout Sessions" } },
       y: { title: { display: true, text: "Volume (Weight × Reps)" }, beginAtZero: true },
     },
+    animation: {
+      duration: 300, // Set animation duration to 300ms for quicker transitions
+    },
   };
 
   return (
-    <div>
+    <div className="bg-white p-4 rounded-lg shadow">
       <select
         value={selectedExercise}
         onChange={(e) => setSelectedExercise(e.target.value)}
+        className="w-full sm:w-[180px] p-2 border rounded mb-4"
       >
         {exerciseNames.map((name) => (
           <option key={name} value={name}>
@@ -113,10 +94,11 @@ const VolumeProgress = () => {
         ))}
       </select>
 
-      {/* Render the chart for the selected exercise */}
-      <div>
-        <Line data={data} options={options} />
-      </div>
+      {filteredSessions.length > 0 ? (
+        <Line data={chartData} options={options} />
+      ) : (
+        <p>No chart data available for {selectedExercise}</p>
+      )}
     </div>
   );
 };

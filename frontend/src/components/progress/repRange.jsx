@@ -7,62 +7,32 @@ import {
   BarElement,
   Tooltip,
   Legend,
+  Filler,
 } from "chart.js";
 
-// Register necessary Chart.js components
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Filler);
 
-const RepRangeAnalysis = () => {
+const RepRangeAnalysis = ({ data = [] }) => {
   const [selectedExercise, setSelectedExercise] = useState("Bench Press");
 
-  // Hardcoded history data with unique timestamps
-  const history = [
-    {
-      name: "Bench Press",
-      dateCompleted: "2025-03-11T15:47:40.163Z",
-      sets: [
-        { reps: 4, weight: 60 },
-        { reps: 4, weight: 60 },
-        { reps: 3, weight: 60 },
-      ],
-    },
-    {
-      name: "Bench Press",
-      dateCompleted: "2025-03-11T18:48:10.270Z",
-      sets: [
-        { reps: 4, weight: 60 },
-        { reps: 4, weight: 60 },
-        { reps: 4, weight: 70 },
-      ],
-    },
-    {
-      name: "Incline Bench Press",
-      dateCompleted: "2025-03-11T15:47:40.199Z",
-      sets: [
-        { reps: 8, weight: 50 },
-        { reps: 8, weight: 50 },
-        { reps: 7, weight: 50 },
-      ],
-    },
-  ];
+  if (!data || data.length === 0) {
+    return <div>No data available</div>;
+  }
 
-  // Get unique exercise names for the dropdown
-  const exerciseNames = Array.from(new Set(history.map((item) => item.name)));
+  const exercisesWithoutCardio = data.filter((exercise) => !exercise.distance);
 
-  // Filter sessions for the selected exercise
-  const filteredSessions = history.filter(
+  const exerciseNames = Array.from(new Set(exercisesWithoutCardio.map((item) => item.name)));
+
+  const filteredSessions = exercisesWithoutCardio.filter(
     (session) => session.name === selectedExercise
   );
 
-  // Create one x-axis label per session (using just the date)
   const xLabels = filteredSessions.map((session) =>
     new Date(session.dateCompleted).toLocaleDateString()
   );
 
-  // Determine the maximum number of sets across all sessions
-  const maxSets = Math.max(...filteredSessions.map((s) => s.sets.length));
+  const maxSets = Math.max(...filteredSessions.map((s) => s.sets ? s.sets.length : 0));
 
-  // Define some colors to differentiate sets
   const datasetColors = [
     "rgba(75, 192, 192, 0.5)",
     "rgba(153, 102, 255, 0.5)",
@@ -70,12 +40,10 @@ const RepRangeAnalysis = () => {
     "rgba(255, 205, 86, 0.5)",
   ];
 
-  // Build a dataset for each set index (e.g., Set 1, Set 2, etc.)
   const datasets = [];
   for (let i = 0; i < maxSets; i++) {
-    // For each session, if there is a set at index i, use its reps; otherwise null.
     const dataForSet = filteredSessions.map((session) =>
-      session.sets[i] ? session.sets[i].reps : null
+      session.sets && session.sets[i] ? session.sets[i].reps : null
     );
     datasets.push({
       label: `Set ${i + 1}`,
@@ -83,6 +51,7 @@ const RepRangeAnalysis = () => {
       backgroundColor: datasetColors[i % datasetColors.length],
       borderColor: datasetColors[i % datasetColors.length].replace("0.5", "1"),
       borderWidth: 1,
+      fill: true,
     });
   }
 
@@ -94,7 +63,6 @@ const RepRangeAnalysis = () => {
   const options = {
     responsive: true,
     plugins: {
-      // Hide legend if you prefer no keys, or set display to true if needed
       legend: { display: false },
       tooltip: { enabled: true },
     },
@@ -107,12 +75,14 @@ const RepRangeAnalysis = () => {
         beginAtZero: true,
       },
     },
+    animation: {
+      duration: 300, 
+    },
   };
 
   return (
     <div className="bg-white p-4 rounded-lg shadow">
-      {/* Dropdown for exercise selection */}
-      <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between pb-2">
+      <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-medium">Reps per Set</h3>
         <select
           value={selectedExercise}
@@ -126,10 +96,13 @@ const RepRangeAnalysis = () => {
           ))}
         </select>
       </div>
-      {/* Render grouped bar chart */}
-      <div className="h-[300px]">
-        <Bar data={chartData} options={options} />
-      </div>
+      {filteredSessions.length === 0 ? (
+        <div>No sets data available for the selected exercise.</div>
+      ) : (
+        <div className="h-[180px]">
+          <Bar data={chartData} options={options} />
+        </div>
+      )}
     </div>
   );
 };
