@@ -6,6 +6,8 @@ import WeightProgress from "@/components/progress/weightProgress";
 import VolumeProgress from "@/components/progress/volumeProgress";
 import RepRangeAnalysis from "@/components/progress/repRange";
 import { format } from "date-fns";
+import PaceAnalysis from "@/components/progress/paceAnalysis";
+import DistanceAnalysis from "@/components/progress/distanceAnalysis";
 
 function ProgressPage() {
   const { user, exerciseHistory, getExerciseHistory } = useAuthStore();
@@ -81,9 +83,20 @@ function ProgressPage() {
             </TabsContent>
 
             <TabsContent value="cardio" className="mt-6">
-              <div className="grid gap-6">
-                <h2 className="text-xl font-semibold text-cyan-600">Cardio</h2>
+              <div className="grid gap-4 bg-white p-2">
+                <h2 className="text-xl font-semibold text-cyan-600">Pace Analysis (Minutes per Kilometer)</h2>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <PaceAnalysis data={exerciseHistory} />
+                </div>
               </div>
+
+              <div className="grid gap-4 bg-white p-2">
+                <h2 className="text-xl font-semibold text-cyan-600">Distance Analysis (km)</h2>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <DistanceAnalysis data={exerciseHistory} />
+                </div>
+              </div>
+
             </TabsContent>
           </Tabs>
         </div>
