@@ -12,7 +12,7 @@ import {
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Filler);
 
-const RepRangeAnalysis = ({ data = [] }) => {
+const RepRangeAnalysis = ({ data = [], showDropdown = true }) => {
   const [selectedExercise, setSelectedExercise] = useState("Bench Press");
 
   if (!data || data.length === 0) {
@@ -84,17 +84,19 @@ const RepRangeAnalysis = ({ data = [] }) => {
     <div className="bg-white p-4 rounded-lg shadow">
       <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-medium">Reps per Set</h3>
-        <select
-          value={selectedExercise}
-          onChange={(e) => setSelectedExercise(e.target.value)}
-          className="w-full sm:w-[180px] p-2 border rounded"
-        >
-          {exerciseNames.map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </select>
+        {showDropdown && (
+          <select
+            value={selectedExercise}
+            onChange={(e) => setSelectedExercise(e.target.value)}
+            className="w-full sm:w-[180px] p-2 border rounded"
+          >
+            {exerciseNames.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
       {filteredSessions.length === 0 ? (
         <div>No sets data available for the selected exercise.</div>

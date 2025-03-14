@@ -21,7 +21,7 @@ ChartJS.register(
   Legend
 );
 
-const VolumeProgress = ({ data }) => {
+const VolumeProgress = ({ data, showDropdown = true }) => {
   if (!data) {
     return <p>No data available</p>;
   }
@@ -82,17 +82,19 @@ const VolumeProgress = ({ data }) => {
 
   return (
     <div className="bg-white p-4 rounded-lg shadow">
-      <select
-        value={selectedExercise}
-        onChange={(e) => setSelectedExercise(e.target.value)}
-        className="w-full sm:w-[180px] p-2 border rounded mb-4"
-      >
-        {exerciseNames.map((name) => (
-          <option key={name} value={name}>
-            {name}
-          </option>
-        ))}
-      </select>
+      {showDropdown && (
+        <select
+          value={selectedExercise}
+          onChange={(e) => setSelectedExercise(e.target.value)}
+          className="w-full sm:w-[180px] p-2 border rounded mb-4"
+        >
+          {exerciseNames.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+      )}
 
       {filteredSessions.length > 0 ? (
         <Line data={chartData} options={options} />

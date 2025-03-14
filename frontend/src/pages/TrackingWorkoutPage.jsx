@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
-import { Plus, Minus, Replace, Trash } from "lucide-react";
+import { Plus, Minus, Replace, Trash, ChartBarDecreasing } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import ExerciseSelector from "@/components/ExerciseSelector";
+import RepRangeAnalysis from "@/components/progress/repRange";
+import WeightProgress from "@/components/progress/weightProgress";
+import VolumeProgress from "@/components/progress/volumeProgress";
 
 const TrackingWorkoutPage = () => {
   const { id } = useParams();
-  const { workouts, getWorkoutById, finishWorkout, user, createWorkoutHistory } = useAuthStore();
+  const { workouts, getWorkoutById, finishWorkout, user, createWorkoutHistory, exerciseHistory, getExerciseHistory } = useAuthStore();
   const [trackingData, setTrackingData] = useState({});
   const [removedDefaultSets, setRemovedDefaultSets] = useState({});
   const [localExercises, setLocalExercises] = useState([]);
   const [replacementTarget, setReplacementTarget] = useState(null);
   const [exerciseSelectorVisible, setExerciseSelectorVisible] = useState(false);
+  const [graphVisible, setGraphVisible] = useState(false);
+  const [filteredHistory, setFilteredHistory] = useState(null);
+  const [selectedAnalysisType, setSelectedAnalysisType] = useState("Weight");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,6 +32,25 @@ const TrackingWorkoutPage = () => {
       setLocalExercises(workouts.workouts);
     }
   }, [workouts]);
+
+  useEffect(() => {
+    if (user && user.email) {
+      getExerciseHistory(user.email);
+    }
+  }, [user, exerciseHistory, getExerciseHistory]);
+
+  const handleDataForGraph = (exerciseName) => {
+    if (!exerciseHistory || !Array.isArray(exerciseHistory)) {
+      console.warn("No exercise history available.");
+      return;
+    }
+    const filteredHistory2 = exerciseHistory.filter(
+      (record) => record.name === exerciseName
+    );
+    setFilteredHistory(filteredHistory2);
+    console.log(filteredHistory);
+    setGraphVisible(!graphVisible);
+  };
 
   const workoutType = workouts?.type;
   const workoutTItle = workouts?.title;
@@ -236,6 +261,10 @@ const TrackingWorkoutPage = () => {
                 <p className="text-lg font-semibold">{exercise.name}</p>
                 {workoutType === "weights" && (
                   <div className="flex space-x-2">
+                    <ChartBarDecreasing
+                      className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
+                      onClick={() => handleDataForGraph(exercise.name)}
+                    />
                     <Replace
                       className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
                       onClick={() =>
@@ -334,6 +363,26 @@ const TrackingWorkoutPage = () => {
                           />
                         </div>
                       ))}
+                  </div>
+                  <div className="p-4">
+                    {graphVisible && (
+                      <>
+                        <select
+                          value={selectedAnalysisType}
+                          onChange={(e) => setSelectedAnalysisType(e.target.value)}
+                          className="w-full sm:w-[180px] p-2 border rounded mb-4"
+                        >
+                          <option value="Weight">Weight</option>
+                          <option value="Rep-Range">Rep-Range</option>
+                          <option value="Volume">Volume</option>
+                        </select>
+
+                        {selectedAnalysisType === "Weight" && <WeightProgress data={filteredHistory} showDropdown={false}/>}
+                        {selectedAnalysisType === "Rep-Range" && <RepRangeAnalysis data={filteredHistory} showDropdown={false}/>}
+                        {selectedAnalysisType === "Volume" && <VolumeProgress data={filteredHistory} showDropdown={false} />}
+                      </>
+                    )}
+
                   </div>
                 </>
               ) : (
