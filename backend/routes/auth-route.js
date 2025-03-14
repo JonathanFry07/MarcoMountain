@@ -1,7 +1,7 @@
 import express from "express";
 import { signup, login, logout, checkAuth, addWorkout, addExercise, finishWorkout, createWorkoutHistory, addRestDay, setWorkoutTarget, addCustomExercise } from "../controllers/auth-controllers.js";
 import { verifyToken } from "../middleware/verifyToken.js";
-import { getCustomExercises, getExerciseHistory, getExercises, getWorkoutHistory, getWorkouts, getWorkoutsById } from "../controllers/auth-getters.js";
+import { getCustomExercises, getExerciseHistory, getExercises, getWorkoutHistory, getWorkouts, getWorkoutsById, getHistoryByEmailUser } from "../controllers/auth-getters.js";
 
 const router = express.Router();
 
@@ -38,5 +38,7 @@ router.get('/get-custom-exercises/:email', getCustomExercises);
 router.get('/get-workout-history/:email', getWorkoutHistory);
 
 router.get('/get-exercise-history/:email', getExerciseHistory);
+
+router.get('/get-exercise-user-history/', getHistoryByEmailUser);
 
 export default router;

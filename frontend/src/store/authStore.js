@@ -487,5 +487,28 @@ export const useAuthStore = create((set) => ({
       set({ isLoading: false, error: error.message });
       throw error;
     }
+  },
+  getExerciseHistoryUserName: async(email, name) => {
+    set({ isLoading: true, error: null});
+    try {
+      const response = await fetch(`${API_URL}/get-exercise-user-history/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email, name})
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      set({ isLoading: false, exerciseHistory: data.history});
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
   }
 }));

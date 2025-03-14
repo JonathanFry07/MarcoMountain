@@ -199,4 +199,30 @@ export const getExercises = async (req, res) => {
     }
 };
 
+export const getHistoryByEmailUser = async (req, res) => {
+  const { email,  name } = req.body; // Get the name from the request body
+
+  if (!email && !name) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required parameter",
+    });
+  }
+
+  try {
+    const history = await ExerciseHistory.find({email, name}).select("-_id -__v");
+
+    return res.status(200).json({
+      success: true,
+      history,
+    });
+  } catch (error) {
+    console.error("Error fetching exercise history:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error fetching exercise history.",
+    });
+  }
+};
+
   
