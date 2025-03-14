@@ -7,6 +7,8 @@ import ExerciseSelector from "@/components/ExerciseSelector";
 import RepRangeAnalysis from "@/components/progress/repRange";
 import WeightProgress from "@/components/progress/weightProgress";
 import VolumeProgress from "@/components/progress/volumeProgress";
+import DistanceAnalysis from "@/components/progress/distanceAnalysis";
+import PaceAnalysis from "@/components/progress/paceAnalysis";
 
 const TrackingWorkoutPage = () => {
   const { id } = useParams();
@@ -17,7 +19,8 @@ const TrackingWorkoutPage = () => {
   const [replacementTarget, setReplacementTarget] = useState(null);
   const [exerciseSelectorVisible, setExerciseSelectorVisible] = useState(false);
   const [graphVisible, setGraphVisible] = useState(false);
-  const [filteredHistory, setFilteredHistory] = useState(null);
+  const [filteredHistory, setFilteredHistory] = useState([]);
+  const [cardioHistory, setCardioHistory] = useState([]);
   const [selectedAnalysisType, setSelectedAnalysisType] = useState("Weight");
   const navigate = useNavigate();
 
@@ -48,7 +51,6 @@ const TrackingWorkoutPage = () => {
       (record) => record.name === exerciseName
     );
     setFilteredHistory(filteredHistory2);
-    console.log(filteredHistory);
     setGraphVisible(!graphVisible);
   };
 
@@ -377,12 +379,11 @@ const TrackingWorkoutPage = () => {
                           <option value="Volume">Volume</option>
                         </select>
 
-                        {selectedAnalysisType === "Weight" && <WeightProgress data={filteredHistory} showDropdown={false}/>}
-                        {selectedAnalysisType === "Rep-Range" && <RepRangeAnalysis data={filteredHistory} showDropdown={false}/>}
+                        {selectedAnalysisType === "Weight" && <WeightProgress data={filteredHistory} showDropdown={false} />}
+                        {selectedAnalysisType === "Rep-Range" && <RepRangeAnalysis data={filteredHistory} showDropdown={false} />}
                         {selectedAnalysisType === "Volume" && <VolumeProgress data={filteredHistory} showDropdown={false} />}
                       </>
                     )}
-
                   </div>
                 </>
               ) : (

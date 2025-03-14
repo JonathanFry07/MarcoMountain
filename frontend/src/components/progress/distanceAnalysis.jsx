@@ -19,13 +19,24 @@ ChartJS.register(
   Legend
 );
 
-const DistanceAnalysis = ({ data }) => {
+const DistanceAnalysis = ({ data, showDropdown = true }) => {
   const [chartData, setChartData] = useState(null);
+  const [selectedExercise, setSelectedExercise] = useState(""); // State for selected exercise
+
+  // Extract unique exercise names from data (filtering out weight-based exercises)
+  const exercises = useMemo(() => {
+    const uniqueExercises = Array.from(
+      new Set(data.filter((session) => session.distance && session.time).map((session) => session.name))
+    );
+    return uniqueExercises;
+  }, [data]);
 
   useEffect(() => {
     if (data && data.length > 0) {
-      // Filter out sessions with missing distance
-      const filteredSessions = data.filter((session) => session.distance && session.time);
+      // Filter out sessions with missing distance or time, or those not matching the selected exercise
+      const filteredSessions = data.filter(
+        (session) => session.distance && session.time && session.name === selectedExercise
+      );
 
       // Create the distance data
       const distanceData = filteredSessions.map((session) => {
@@ -54,7 +65,7 @@ const DistanceAnalysis = ({ data }) => {
         ],
       });
     }
-  }, [data]);
+  }, [data, selectedExercise]);
 
   // Memoize chart data and options to improve performance
   const memoizedChartData = useMemo(() => chartData, [chartData]);
@@ -94,6 +105,25 @@ const DistanceAnalysis = ({ data }) => {
 
   return (
     <div className="bg-white p-4 rounded-lg shadow-sm">
+      {/* Conditional Dropdown to select exercise */}
+      {showDropdown && (
+        <div className="mb-4">
+          <select
+            value={selectedExercise}
+            onChange={(e) => setSelectedExercise(e.target.value)}
+            className="w-full sm:w-[180px] p-2 border rounded"
+          >
+            <option value="">Select Exercise</option>
+            {exercises.map((exercise) => (
+              <option key={exercise} value={exercise}>
+                {exercise}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Render the chart if there's data */}
       <div className="grid gap-4 md:grid-cols-2">
         {memoizedChartData ? (
           <Bar data={memoizedChartData} options={options} />
