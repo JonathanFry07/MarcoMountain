@@ -22,7 +22,6 @@ ChartJS.register(
 );
 
 const PaceAnalysis = ({ data, showDropdown = true }) => {
-  console.log("data: ", data);
   const [chartData, setChartData] = useState(null);
   const [paceData, setPaceData] = useState([]);
   const [selectedExercise, setSelectedExercise] = useState(""); // State for selected exercise
@@ -35,8 +34,15 @@ const PaceAnalysis = ({ data, showDropdown = true }) => {
     return uniqueExercises;
   }, [data]);
 
+  // Set default exercise when data loads
   useEffect(() => {
-    if (data && data.length > 0) {
+    if (exercises.length > 0 && !selectedExercise) {
+      setSelectedExercise(exercises[0]); // Set first available exercise
+    }
+  }, [exercises, selectedExercise]);
+
+  useEffect(() => {
+    if (data && data.length > 0 && selectedExercise) {
       // Filter out sessions with missing distance, time, or that do not match the selected exercise
       const filteredSessions = data.filter(
         (session) => session.distance && session.time && session.name === selectedExercise
@@ -123,12 +129,15 @@ const PaceAnalysis = ({ data, showDropdown = true }) => {
             onChange={(e) => setSelectedExercise(e.target.value)}
             className="w-full sm:w-[180px] p-2 border rounded"
           >
-            <option value="">Select Exercise</option>
-            {exercises.map((exercise) => (
-              <option key={exercise} value={exercise}>
-                {exercise}
-              </option>
-            ))}
+            {exercises.length === 0 ? (
+              <option value="">No exercises available</option>
+            ) : (
+              exercises.map((exercise) => (
+                <option key={exercise} value={exercise}>
+                  {exercise}
+                </option>
+              ))
+            )}
           </select>
         </div>
       )}
@@ -138,7 +147,7 @@ const PaceAnalysis = ({ data, showDropdown = true }) => {
         {memoizedChartData ? (
           <Line data={memoizedChartData} options={options} />
         ) : (
-          <p>Loading pace data...</p>
+          <p>No pace data available.</p>
         )}
       </div>
     </div>

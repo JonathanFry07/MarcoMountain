@@ -31,6 +31,13 @@ const DistanceAnalysis = ({ data, showDropdown = true }) => {
     return uniqueExercises;
   }, [data]);
 
+  // NEW CODE: Set the default exercise when exercises array changes
+  useEffect(() => {
+    if (exercises.length > 0 && !selectedExercise) {
+      setSelectedExercise(exercises[0]);
+    }
+  }, [exercises, selectedExercise]);
+
   useEffect(() => {
     if (data && data.length > 0) {
       // Filter out sessions with missing distance or time, or those not matching the selected exercise

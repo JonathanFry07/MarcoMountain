@@ -13,19 +13,18 @@ export default function ExerciseHistory({ exerciseName }) {
   const [workoutLimit, setWorkoutLimit] = useState("1");
   const { user, getExerciseHistoryUserName, exercises } = useAuthStore();
 
-  // Memoized function to fetch exercise history (prevents unnecessary re-renders)
+  // Memoized function to fetch exercise history
   const fetchHistory = useCallback(() => {
     if (user?.email) {
       getExerciseHistoryUserName(user.email, exerciseName);
     }
   }, [user?.email, exerciseName, getExerciseHistoryUserName]);
 
-  // Fetch exercise history only when email or exercise name changes
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
 
-  // Ensure exerciseHistory is always an array (prevents crashes)
+  // Ensure exercises is always an array (prevents errors)
   const workoutData = Array.isArray(exercises) ? exercises : [];
 
   // Sort workouts by date (newest first)
@@ -39,8 +38,6 @@ export default function ExerciseHistory({ exerciseName }) {
   const toggleExpand = (date) => {
     setExpandedWorkout(expandedWorkout === date ? null : date);
   };
-
-  console.log(exercises);
 
   return (
     <div className="w-full">
@@ -91,13 +88,24 @@ export default function ExerciseHistory({ exerciseName }) {
                     <Table className="w-full">
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="w-1/4 text-xs sm:text-sm">Set</TableHead>
-                          <TableHead className="w-1/4 text-xs sm:text-sm">Weight (kg)</TableHead>
-                          <TableHead className="w-1/4 text-xs sm:text-sm">Reps</TableHead>
+                          {workout.sets && workout.sets.length > 0 ? (
+                            <>
+                              <TableHead className="w-1/4 text-xs sm:text-sm">Set</TableHead>
+                              <TableHead className="w-1/4 text-xs sm:text-sm">Weight (kg)</TableHead>
+                              <TableHead className="w-1/4 text-xs sm:text-sm">Reps</TableHead>
+                            </>
+                          ) : workout.distance && workout.time ? (
+                            <>
+                              <TableHead className="w-1/2 text-xs sm:text-sm">Distance (km)</TableHead>
+                              <TableHead className="w-1/2 text-xs sm:text-sm">Time (min)</TableHead>
+                            </>
+                          ) : (
+                            <TableHead className="w-full text-xs sm:text-sm text-center">No Data</TableHead>
+                          )}
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {workout.sets && Array.isArray(workout.sets) ? (
+                        {workout.sets && workout.sets.length > 0 ? (
                           workout.sets.map((set, setIndex) => (
                             <TableRow key={setIndex}>
                               <TableCell className="py-1 text-xs sm:text-sm">{setIndex + 1}</TableCell>
@@ -105,10 +113,15 @@ export default function ExerciseHistory({ exerciseName }) {
                               <TableCell className="py-1 text-xs sm:text-sm">{set.reps}</TableCell>
                             </TableRow>
                           ))
+                        ) : workout.distance && workout.time ? (
+                          <TableRow>
+                            <TableCell className="py-1 text-xs sm:text-sm">{workout.distance} km</TableCell>
+                            <TableCell className="py-1 text-xs sm:text-sm">{workout.time} min</TableCell>
+                          </TableRow>
                         ) : (
                           <TableRow>
                             <TableCell colSpan={3} className="text-center py-2 text-xs sm:text-sm text-gray-500">
-                              No sets data available
+                              No data available
                             </TableCell>
                           </TableRow>
                         )}

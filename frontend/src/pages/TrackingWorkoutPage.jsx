@@ -355,11 +355,17 @@ const TrackingWorkoutPage = () => {
                       ))}
                   </div>
                   <div>
-                  {historyVisibility[exercise._id] && <ExerciseHistory exerciseName={exercise.name}/>}
+                    {historyVisibility[exercise._id] && <ExerciseHistory exerciseName={exercise.name} />}
                   </div>
                 </>
               ) : (
                 <>
+                  <div className="w-full flex justify-end">
+                    <ChartBar
+                      className="w-5 h-5 text-cyan-600 cursor-pointer hover:text-cyan-800"
+                      onClick={() => toggleHistory(exercise._id)}
+                    />
+                  </div>
                   <div className="flex justify-between text-gray-700 text-sm font-medium mt-2 mb-1">
                     <span>Distance (km)</span>
                     <span>Time (minutes)</span>
@@ -385,6 +391,9 @@ const TrackingWorkoutPage = () => {
                         min="0"
                       />
                     </div>
+                  </div>
+                  <div>
+                    {historyVisibility[exercise._id] && <ExerciseHistory exerciseName={exercise.name} />}
                   </div>
                 </>
               )}
