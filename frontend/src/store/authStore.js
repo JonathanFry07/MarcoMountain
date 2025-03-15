@@ -488,27 +488,38 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  getExerciseHistoryUserName: async(email, name) => {
-    set({ isLoading: true, error: null});
+  getExerciseHistoryUserName: async (email, name) => {
+    set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`${API_URL}/get-exercise-user-history/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({email, name})
-      });
-
+      // Encode URI components for special characters
+      const encodedEmail = encodeURIComponent(email);
+      const encodedName = encodeURIComponent(name);
+      
+      const response = await fetch(
+        `${API_URL}/get-exercise-user-history/?email=${encodedEmail}&name=${encodedName}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
+  
       const data = await response.json();
-
-      set({ isLoading: false, exerciseHistory: data.history});
+      
+      // Important: Make sure we're extracting the history array correctly
+      const historyData = data.history || [];
+      
+      set({ isLoading: false, exercises: historyData });
+      return historyData;
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
     }
   }
+  
 }));

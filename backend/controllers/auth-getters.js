@@ -200,29 +200,54 @@ export const getExercises = async (req, res) => {
 };
 
 export const getHistoryByEmailUser = async (req, res) => {
-  const { email,  name } = req.body; // Get the name from the request body
-
-  if (!email && !name) {
-    return res.status(400).json({
-      success: false,
-      message: "Missing required parameter",
-    });
-  }
-
   try {
-    const history = await ExerciseHistory.find({email, name}).select("-_id -__v");
+    // Use req.query for GET requests
+    const { email, name } = req.query;
 
+    // Input validation with specific error messages
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email parameter is required"
+      });
+    }
+
+    if (!name) {
+      return res.status(400).json({
+        success: false,
+        message: "Name parameter is required"
+      });
+    }
+    
+    // Execute query directly with the provided parameters
+    const history = await ExerciseHistory.find({ 
+      email, 
+      name 
+    }).select("-_id -__v");
+
+    // Return successful response
     return res.status(200).json({
       success: true,
-      history,
+      history
     });
+    
   } catch (error) {
     console.error("Error fetching exercise history:", error);
+    
+    // Provide more specific error handling
+    if (error.name === 'CastError') {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid parameter format"
+      });
+    }
+    
     return res.status(500).json({
       success: false,
-      message: "Error fetching exercise history.",
+      message: "Internal server error while fetching exercise history"
     });
   }
 };
+
 
   

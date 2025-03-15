@@ -8,7 +8,7 @@ import ExerciseHistory from "@/components/exerciseHistory";
 
 const TrackingWorkoutPage = () => {
   const { id } = useParams();
-  const { workouts, getWorkoutById, finishWorkout, user, createWorkoutHistory, exerciseHistory, getExerciseHistory } = useAuthStore();
+  const { workouts, getWorkoutById, finishWorkout, user, createWorkoutHistory, exerciseHistory, getExerciseHistory, getExerciseHistoryUserName } = useAuthStore();
   const [trackingData, setTrackingData] = useState({});
   const [removedDefaultSets, setRemovedDefaultSets] = useState({});
   const [localExercises, setLocalExercises] = useState([]);
@@ -355,7 +355,7 @@ const TrackingWorkoutPage = () => {
                       ))}
                   </div>
                   <div>
-                  {historyVisibility[exercise._id] && <ExerciseHistory />}
+                  {historyVisibility[exercise._id] && <ExerciseHistory exerciseName={exercise.name}/>}
                   </div>
                 </>
               ) : (
