@@ -1,7 +1,7 @@
 import express from "express";
-import { signup, login, logout, checkAuth, addWorkout, addExercise, finishWorkout, createWorkoutHistory, addRestDay, setWorkoutTarget, addCustomExercise } from "../controllers/auth-controllers.js";
+import { signup, login, logout, checkAuth, addWorkout, addExercise, finishWorkout, createWorkoutHistory, addRestDay, setWorkoutTarget, addCustomExercise, upsertUserMacros } from "../controllers/auth-controllers.js";
 import { verifyToken } from "../middleware/verifyToken.js";
-import { getCustomExercises, getExerciseHistory, getExercises, getWorkoutHistory, getWorkouts, getWorkoutsById, getHistoryByEmailUser } from "../controllers/auth-getters.js";
+import { getCustomExercises, getExerciseHistory, getExercises, getWorkoutHistory, getWorkouts, getWorkoutsById, getHistoryByEmailUser, getMarcos } from "../controllers/auth-getters.js";
 
 const router = express.Router();
 
@@ -25,6 +25,8 @@ router.post('/post-rest-day', addRestDay);
 
 router.post('/post-workout-target', setWorkoutTarget);
 
+router.post('/upsert-marcos', upsertUserMacros);
+
 router.get('/check-auth', verifyToken, checkAuth);
 
 router.get('/get-workouts/:email', getWorkouts);
@@ -40,5 +42,7 @@ router.get('/get-workout-history/:email', getWorkoutHistory);
 router.get('/get-exercise-history/:email', getExerciseHistory);
 
 router.get('/get-exercise-user-history/', getHistoryByEmailUser);
+
+router.get('/get-marcos/:email', getMarcos);
 
 export default router;

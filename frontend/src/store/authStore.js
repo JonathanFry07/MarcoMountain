@@ -12,6 +12,7 @@ export const useAuthStore = create((set) => ({
   exercises: [],
   workoutHistory: [],
   exerciseHistory: [],
+  marcos: [],
 
   signup: async (email, name, password) => {
     set({ isLoading: true, error: null });
@@ -501,7 +502,8 @@ export const useAuthStore = create((set) => ({
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-          },
+          }, 
+          credentials: "include",
         }
       );
   
@@ -520,6 +522,49 @@ export const useAuthStore = create((set) => ({
       set({ isLoading: false, error: error.message });
       throw error;
     }
+  },
+  upsertMarcos: async (email, calories, protein, carbs, fat) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch (`${API_URL}/upsert-marcos`,{
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email, calories, protein, carbs, fat})
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      set({ isLoading: false, message: "updated macros" });
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  getMarcos: async(email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch (`${API_URL}/get-marcos/${email}`, {
+        method: "GET", 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      set({ isLoading: false, macros: data });
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
   }
-  
 }));

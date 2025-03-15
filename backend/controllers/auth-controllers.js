@@ -6,6 +6,7 @@ import Exercise from "../model/exercise.js";
 import ExerciseHistory from "../model/exerciseHistory.js";
 import WorkoutHistory from "../model/workoutHistory.js";
 import CustomExercise from "../model/customExercise.js";
+import UserMarcos from "../model/macros.js";
 
 export const signup = async (req, res) => {
     const { email, name, password } = req.body;
@@ -381,5 +382,27 @@ export const setWorkoutTarget = async (req, res) => {
     res.status(200).json({ message: "Workout target updated", user });
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+export const upsertUserMacros = async (req, res) => {
+  try {
+    const { email, calories, protein, carbs, fat } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required.' });
+    }
+
+    // Use findOneAndUpdate with upsert: true.
+    // $set operator updates only the given fields (email remains unchanged if the record exists).
+    const updatedRecord = await UserMarcos.findOneAndUpdate(
+      { email },
+      { $set: { calories, protein, carbs, fat } },
+      { new: true, upsert: true, runValidators: true }
+    );
+
+    res.status(200).json(updatedRecord);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
