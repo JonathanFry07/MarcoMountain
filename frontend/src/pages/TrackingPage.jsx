@@ -16,17 +16,13 @@ const TrackingPage = () => {
     setShowWorkoutSelection(false); // Hide WorkoutSelection when its back button is clicked
   };
 
-  const handleClick = () => {
-    navigate("/recent-activity");
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-start overflow-hidden relative">
       <div className="space-y-4 max-w-xs mx-auto w-full pt-12">
         {/* Calories Tracking Button */}
         <button
           className="w-full bg-white rounded-lg shadow p-4 flex items-center hover:bg-gray-50 active:bg-gray-100 transition-colors"
-          onClick={() => console.log("Navigate to calorie tracking")}
+          onClick={() => navigate("/calories")}
         >
           <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mr-4">
             <Utensils className="h-5 w-5 text-teal-600" />
@@ -54,7 +50,9 @@ const TrackingPage = () => {
         {/* View recent activity Button */}
         <button
           className="w-full bg-white rounded-lg shadow p-4 flex items-center hover:bg-gray-50 active:bg-gray-100 transition-colors"
-          onClick={handleClick}
+          onClick={() => {
+            navigate("/recent-activity");
+          }}
         >
           <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center mr-4">
             <CalendarDays className="h-5 w-5 text-cyan-600" />

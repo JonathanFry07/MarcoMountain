@@ -10,6 +10,7 @@ import TrackingPage from './pages/TrackingPage';
 import TrackingWorkoutPage from './pages/TrackingWorkoutPage';
 import CalendarPage from './pages/CalendarPage';
 import ProgressPage from './pages/ProgressPage';
+import TrackingCaloriesPage from './pages/TrackingCalroiesPage';
 
 function App() {
 
@@ -39,6 +40,7 @@ function App() {
           <Route path="/tracking-workout/:id" element={<TrackingWorkoutPage />} /> 
           <Route path="/recent-activity" element={<CalendarPage />} />
           <Route path="/progress" element={<ProgressPage />} />
+          <Route path="/calories" element={<TrackingCaloriesPage /> } />
         </Routes>
       </div>
 
