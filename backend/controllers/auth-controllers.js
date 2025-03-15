@@ -406,3 +406,22 @@ export const upsertUserMacros = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const setHeightAndWeight = async (req, res) => {
+  try {
+    const { email, weight, height } = req.body;
+
+    const result = await User.updateOne(
+      { email }, 
+      { $set: { weight, height } }  
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({ message: "User's height and weight updated successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

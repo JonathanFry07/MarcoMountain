@@ -20,7 +20,9 @@ const UserSchema = new mongoose.Schema({
   workoutTarget: {
     type: Number,
     default: 4
-  }
+  },
+  height: {type: Number},
+  weight: {type: Number}
 });
 
 const User = mongoose.model("User", UserSchema);

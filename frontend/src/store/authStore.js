@@ -7,12 +7,13 @@ export const useAuthStore = create((set) => ({
   isLoading: false,
   error: null,
   isAuthenticated: false,
+  marcos: [],
   isCheckingAuth: true,
   workouts: [],
   exercises: [],
   workoutHistory: [],
   exerciseHistory: [],
-  marcos: [],
+  userDetails: [],
 
   signup: async (email, name, password) => {
     set({ isLoading: true, error: null });
@@ -559,9 +560,54 @@ export const useAuthStore = create((set) => ({
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
+      const result = await response.json();
 
-      set({ isLoading: false, macros: data });
+      set({ isLoading: false, marcos: result.data });
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  setWeightHeight: async(email, weight, height) => {
+    try {
+      const response = await fetch (`${API_URL}/update-user`,{
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email, weight, height})
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      set({ isLoading: false, message: "updated height and weight" });
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  getUser: async(email) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch (`${API_URL}/get-user/${email}`, {
+        method: "GET", 
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      console.log(result);
+
+      set({ isLoading: false, userDetails: result.user });
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;

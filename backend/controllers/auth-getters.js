@@ -4,6 +4,7 @@ import WorkoutHistory from "../model/workoutHistory.js";
 import CustomExercise from "../model/customExercise.js";
 import ExerciseHistory from "../model/exerciseHistory.js";
 import UserMarcos from "../model/macros.js";
+import User from "../model/user.js";
 
 export const getWorkouts = async (req, res) => {
   const { email } = req.params;
@@ -258,7 +259,7 @@ export const getMarcos = async (req,res) => {
     }
     const data = await UserMarcos.findOne({email})
 
-    return res.status(500).json({
+    return res.status(200).json({
       success: true,
       data
     });
@@ -269,4 +270,22 @@ export const getMarcos = async (req,res) => {
     });
   }
 };
-  
+
+export const getUser = async (req, res) => {
+  const { email } = req.params;
+  try {
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required.' });
+    }
+    const user = await User.findOne({email});
+
+    return res.status(200).json({
+      user
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+}
