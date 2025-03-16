@@ -11,14 +11,15 @@ const TrackingCaloriesPage = () => {
   const [weight, setWeight] = useState(0);
   const [height, setHeight] = useState(0);
 
-  const { user, getMarcos, marcos, setWeightHeight, getUser, userDetails } = useAuthStore();
+  const { user, getMarcos, marcos, setWeightHeight, getUser, userDetails, getDailyMacros, currentMacros } = useAuthStore();
 
   useEffect(() => {
     if (user && user.email) {
       getUser(user.email);  // Fetch user details
       getMarcos(user.email);  // Fetch macros
+      getDailyMacros(user.email, new Date().toISOString().split("T")[0]);
     }
-  }, [user, getUser, getMarcos]);
+  }, [user, getUser, getDailyMacros, getMarcos]);
 
   useEffect(() => {
     if (userDetails && userDetails.height !== undefined && userDetails.weight !== undefined) {
@@ -29,11 +30,11 @@ const TrackingCaloriesPage = () => {
   }, [userDetails]);
 
   const handleWeightHeight = async () => {
-    if(!weight && !height){
+    if (!weight && !height) {
       alert("Please enter Height/Weight")
     }
-    else{
-      await setWeightHeight(user.email, weight, height); 
+    else {
+      await setWeightHeight(user.email, weight, height);
       getUser(user.email);
     }
   };
@@ -100,22 +101,44 @@ const TrackingCaloriesPage = () => {
         <Card className="p-4">
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium">Calories: 150/{marcos.calories}</p>
-              <Progress value={150 / 200 * 100} />
+              <p className="text-sm font-medium">
+                {currentMacros.totalCalories}/{marcos.calories}
+              </p>
+              <Progress
+                value={(currentMacros.totalCalories / marcos.calories) * 100}
+                className={currentMacros.totalCalories > marcos.calories ? 'bg-red-500' : ''}
+              />
             </div>
             <div>
-              <p className="text-sm font-medium">Carbohydrates: 150/{marcos.carbs}</p>
-              <Progress value={150 / 200 * 100} />
+              <p className="text-sm font-medium">
+                {currentMacros.totalCarbs}/{marcos.carbs}
+              </p>
+              <Progress
+                value={(currentMacros.totalCarbs / marcos.carbs) * 100}
+                className={currentMacros.totalCarbs > marcos.carbs ? 'bg-red-500' : ''}
+              />
             </div>
             <div>
-              <p className="text-sm font-medium">Protein: 80/{marcos.protein}</p>
-              <Progress value={80 / 100 * 100} />
+              <p className="text-sm font-medium">
+                {currentMacros.totalProtein}/{marcos.protein}
+              </p>
+              <Progress
+                value={(currentMacros.totalProtein / marcos.protein) * 100}
+                className={currentMacros.totalProtein > marcos.protein ? 'bg-red-500' : ''}
+              />
             </div>
             <div>
-              <p className="text-sm font-medium">Fat: 50/{marcos.fat}</p>
-              <Progress value={50 / 70 * 100} />
+              <p className="text-sm font-medium">
+                {currentMacros.totalFat}/{marcos.fat}
+              </p>
+              <Progress
+                value={(currentMacros.totalFat / marcos.fat) * 100}
+                className={currentMacros.totalFat > marcos.fat ? 'bg-red-500' : ''}
+              />
             </div>
           </div>
+
+
         </Card>
       )}
       <Card>

@@ -51,6 +51,6 @@ router.get('/get-marcos/:email', getMarcos);
 
 router.get('/get-user/:email', getUser);
 
-router.get('/get-today-macros/', getDailyMacrosAggregate)
+router.get('/get-macros/', getDailyMacrosAggregate)
 
 export default router;

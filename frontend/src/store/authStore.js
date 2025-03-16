@@ -14,6 +14,7 @@ export const useAuthStore = create((set) => ({
   workoutHistory: [],
   exerciseHistory: [],
   userDetails: [],
+  currentMacros: [],
 
   signup: async (email, name, password) => {
     set({ isLoading: true, error: null });
@@ -606,6 +607,58 @@ export const useAuthStore = create((set) => ({
       const result = await response.json();
 
       set({ isLoading: false, userDetails: result.user });
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  addMacros: async(email, name, mealType, foods, totalMacros) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`${API_URL}/post-meal`,{
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: json.stringify(email, name, mealType, foods, totalMacros)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      set({isLoading: false, currentMacros: result })
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  getDailyMacros: async(email, date) => {
+    set({isLoading: true, error: null});
+    try {
+      const encodedEmail = encodeURIComponent(email);
+      const encodedDate = encodeURIComponent(date);
+      
+      const response = await fetch(
+        `${API_URL}/get-macros/?email=${encodedEmail}&date=${encodedDate}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          }, 
+          credentials: "include",
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+
+      set({isLoading: false, currentMacros: data})
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
