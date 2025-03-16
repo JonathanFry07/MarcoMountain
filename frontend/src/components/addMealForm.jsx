@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Search, StepBack } from 'lucide-react';
+import { useAuthStore } from '@/store/authStore';
 
 const AddMealForm = ({ close }) => {
     // Form states
@@ -8,6 +9,14 @@ const AddMealForm = ({ close }) => {
     const [isSearching, setIsSearching] = useState(false);
     const [selectedFood, setSelectedFood] = useState(null);
     const [quantity, setQuantity] = useState(100);
+
+    // Get nutrition data from auth store
+    const { nutrition, getNutrition, isLoading } = useAuthStore();
+
+    // Fetch nutrition data on component mount
+    useEffect(() => {
+        getNutrition();
+    }, [getNutrition]);
 
     // Meal states
     const [mealType, setMealType] = useState('breakfast');
@@ -20,17 +29,27 @@ const AddMealForm = ({ close }) => {
         fat: 0
     });
 
-    // Sample food database (all values per 100g)
-    const foodDatabase = [
-        { id: 1, name: 'Apple', calories: 52, protein: 0.3, carbs: 14, fat: 0.2 },
-        { id: 2, name: 'Banana', calories: 89, protein: 1.1, carbs: 23, fat: 0.3 },
-        { id: 3, name: 'Chicken Breast', calories: 165, protein: 31, carbs: 0, fat: 3.6 },
-        { id: 4, name: 'Brown Rice', calories: 111, protein: 2.6, carbs: 23, fat: 0.9 },
-        { id: 5, name: 'Salmon', calories: 206, protein: 22, carbs: 0, fat: 13 },
-        { id: 6, name: 'Spinach', calories: 23, protein: 2.9, carbs: 3.6, fat: 0.4 },
-        { id: 7, name: 'Greek Yogurt', calories: 59, protein: 10, carbs: 3.6, fat: 0.4 },
-        { id: 8, name: 'Avocado', calories: 160, protein: 2, carbs: 8.5, fat: 14.7 }
-    ];
+    // Helper function to parse nutrition values
+    const parseNutritionValue = (value) => {
+        if (typeof value === 'string') {
+            // Extract the number part from strings like "9.17 g"
+            const match = value.match(/(\d+(\.\d+)?)/);
+            return match ? parseFloat(match[0]) : 0;
+        }
+        return value;
+    };
+
+    // Format nutrition data for internal use
+    const formatNutritionData = (item) => {
+        return {
+            id: item.food, // Using food name as ID
+            name: item.food,
+            calories: parseNutritionValue(item.calories),
+            protein: parseNutritionValue(item.protein),
+            carbs: parseNutritionValue(item.carbs),
+            fat: parseNutritionValue(item.fat)
+        };
+    };
 
     // Update total macros whenever meal foods change
     useEffect(() => {
@@ -47,22 +66,25 @@ const AddMealForm = ({ close }) => {
     }, [mealFoods]);
 
     const handleSearch = (event) => {
+        console.log(nutrition)
         const term = event.target.value;
         setSearchTerm(term);
         setIsSearching(true);
-
+    
         // Only search if term is not empty
         if (term.trim() === '') {
             setSearchResults([]);
             setIsSearching(false);
             return;
         }
-
-        // Filter the database based on the search term
-        const results = foodDatabase.filter(food =>
-            food.name.toLowerCase().includes(term.toLowerCase())
-        );
-
+    
+        // Filter the nutrition data based on the search term
+        // Limit results to the first 5 matches
+        const results = (Array.isArray(nutrition) ? nutrition : [])
+            .filter(food => food.food.toLowerCase().includes(term.toLowerCase()))
+            .map(formatNutritionData)
+            .slice(0, 5);  // Take only the first 5 results
+    
         setSearchResults(results);
         setIsSearching(false);
     };
@@ -129,9 +151,11 @@ const AddMealForm = ({ close }) => {
 
     return (
         <div className="w-full max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
-            <StepBack onClick={close} />
-            <div className="w-full max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
-                <h2 className="text-xl font-bold mb-4">Create a Meal</h2>
+            <div className="flex items-center mb-4">
+                <button onClick={close} className="mr-2">
+                    <StepBack size={20} />
+                </button>
+                <h2 className="text-xl font-bold">Create a Meal</h2>
             </div>
 
             <div className="mb-6 p-4 border border-gray-200 rounded-lg">
@@ -189,6 +213,12 @@ const AddMealForm = ({ close }) => {
                                 onChange={handleSearch}
                             />
                         </div>
+
+                        {isLoading && (
+                            <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
+                                Loading foods...
+                            </div>
+                        )}
 
                         {isSearching && (
                             <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">

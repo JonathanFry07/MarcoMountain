@@ -684,6 +684,8 @@ export const useAuthStore = create((set) => ({
   
       const data = await response.json();
 
+      console.log(data);
+
       set({ isLoading: false, nutrition: data.nutritionData})
     } catch (error) {
       set({ isLoading: false, error: error.message });
