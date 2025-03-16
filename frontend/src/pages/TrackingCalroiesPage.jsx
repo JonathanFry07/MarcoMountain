@@ -21,8 +21,6 @@ const TrackingCaloriesPage = () => {
   }, [user, getUser, getMarcos]);
 
   useEffect(() => {
-    // Log userDetails to check if it is populated correctly
-    console.log("User Details:", userDetails);
     if (userDetails && userDetails.height !== undefined && userDetails.weight !== undefined) {
       // Only update state if valid values are received
       setWeight(userDetails.weight);
@@ -31,8 +29,19 @@ const TrackingCaloriesPage = () => {
   }, [userDetails]);
 
   const handleWeightHeight = async () => {
-    await setWeightHeight(user.email, weight, height);  // Update weight and height
+    if(!weight && !height){
+      alert("Please enter Height/Weight")
+    }
+    else{
+      await setWeightHeight(user.email, weight, height); 
+      getUser(user.email);
+    }
   };
+
+  const toggleFormVisible = async () => {
+    await getMarcos(user.email);
+    setFormVisible(!formVisible);
+  }
 
   return (
     <div className="p-4 space-y-6">
@@ -50,7 +59,7 @@ const TrackingCaloriesPage = () => {
                 <input
                   type="number"
                   value={weight}
-                  onChange={(e) => setWeight(Number(e.target.value))}
+                  onChange={(e) => setWeight(e.target.value)}
                   className="w-20 text-3xl font-bold text-primary focus:outline-none"
                 />
                 <span className="text-2xl font-medium text-muted-foreground ml-1">kg</span>
@@ -64,7 +73,7 @@ const TrackingCaloriesPage = () => {
                 <input
                   type="number"
                   value={height}
-                  onChange={(e) => setHeight(Number(e.target.value))}
+                  onChange={(e) => setHeight(e.target.value)}
                   className="w-20 text-3xl font-bold text-primary focus:outline-none"
                 />
                 <span className="text-2xl font-medium text-muted-foreground ml-1">cm</span>
@@ -81,32 +90,34 @@ const TrackingCaloriesPage = () => {
         </CardFooter>
       </Card>
 
-      <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white" onClick={() => setFormVisible(!formVisible)}>
+      <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white" onClick={toggleFormVisible}>
         {formVisible ? "Hide Macros Calculator" : "Calculate Macros"}
       </Button>
 
-      {formVisible && <DailyCalorieCalculator height={height} weight={weight} />}
-      
-      <Card className="p-4">
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm font-medium">Calories: 150/{marcos.calories}</p>
-            <Progress value={150 / 200 * 100} />
+      {formVisible ? (
+        <DailyCalorieCalculator height={height} weight={weight} />
+      ) : (
+        <Card className="p-4">
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium">Calories: 150/{marcos.calories}</p>
+              <Progress value={150 / 200 * 100} />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Carbohydrates: 150/{marcos.carbs}</p>
+              <Progress value={150 / 200 * 100} />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Protein: 80/{marcos.protein}</p>
+              <Progress value={80 / 100 * 100} />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Fat: 50/{marcos.fat}</p>
+              <Progress value={50 / 70 * 100} />
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium">Carbohydrates: 150/{marcos.carbs}</p>
-            <Progress value={150 / 200 * 100} />
-          </div>
-          <div>
-            <p className="text-sm font-medium">Protein: 80/{marcos.protein}</p>
-            <Progress value={80 / 100 * 100} />
-          </div>
-          <div>
-            <p className="text-sm font-medium">Fat: 50/{marcos.fat}</p>
-            <Progress value={50 / 70 * 100} />
-          </div>
-        </div>
-      </Card>
+        </Card>
+      )}
       <Card>
         <button onClick={() => console.log("add")}>Add Meal</button>
       </Card>

@@ -1,3 +1,4 @@
+import { useAuthStore } from '@/store/authStore';
 import React, { useState } from 'react';
 
 const DailyCalorieCalculator = ({ height, weight }) => {
@@ -10,13 +11,15 @@ const DailyCalorieCalculator = ({ height, weight }) => {
     const [fatRatio, setFatRatio] = useState(0.3);
     const [carbRatio, setCarbRatio] = useState(0.4);
 
-    const calculateCalories = (e) => {
+    const { user, upsertMacros } = useAuthStore();
+
+    const calculateCalories = async (e) => {
         e.preventDefault();
 
         const calculateMacros = (totalCalories, proteinRatio = 0.3, fatRatio = 0.3, carbRatio = 0.4) => {
             // Verify ratios sum to 1.0
             if (Math.abs(proteinRatio + fatRatio + carbRatio - 1.0) > 0.01) {
-                throw new Error("Macronutrient ratios must sum to 1.0");
+                throw new Error("Macro nutrient ratios must sum to 1.0");
             }
 
             // Calculate calories from each macronutrient
@@ -101,6 +104,18 @@ const DailyCalorieCalculator = ({ height, weight }) => {
         }
 
         const macros = calculateMacros(goalCalories, proteinRatio, fatRatio, carbRatio);
+
+        try {
+            await upsertMacros(
+                user.email,
+                Math.round(goalCalories),
+                macros.protein,
+                macros.carbs, // passing carbs before fat as per your requested order
+                macros.fat
+            );
+        } catch (error) {
+            console.error("Error upserting macros:", error);
+        }
 
         setResult({
             bmr: Math.round(bmr),

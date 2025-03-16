@@ -524,7 +524,7 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  upsertMarcos: async (email, calories, protein, carbs, fat) => {
+  upsertMacros: async (email, calories, protein, carbs, fat) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch (`${API_URL}/upsert-marcos`,{
@@ -604,8 +604,6 @@ export const useAuthStore = create((set) => ({
       }
 
       const result = await response.json();
-
-      console.log(result);
 
       set({ isLoading: false, userDetails: result.user });
     } catch (error) {

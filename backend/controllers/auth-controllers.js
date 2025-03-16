@@ -7,6 +7,8 @@ import ExerciseHistory from "../model/exerciseHistory.js";
 import WorkoutHistory from "../model/workoutHistory.js";
 import CustomExercise from "../model/customExercise.js";
 import UserMarcos from "../model/macros.js";
+import Meal from "../model/meal.js";
+
 
 export const signup = async (req, res) => {
     const { email, name, password } = req.body;
@@ -392,9 +394,6 @@ export const upsertUserMacros = async (req, res) => {
     if (!email) {
       return res.status(400).json({ error: 'Email is required.' });
     }
-
-    // Use findOneAndUpdate with upsert: true.
-    // $set operator updates only the given fields (email remains unchanged if the record exists).
     const updatedRecord = await UserMarcos.findOneAndUpdate(
       { email },
       { $set: { calories, protein, carbs, fat } },
@@ -423,5 +422,42 @@ export const setHeightAndWeight = async (req, res) => {
     res.status(200).json({ message: "User's height and weight updated successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const addMeal = async (req, res) => {
+  const { email, name, mealType, foods, totalMacros } = req.body;
+
+  if (!email || !name || !mealType || !foods || !Array.isArray(foods) || foods.length === 0 || !totalMacros) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields: email, name, mealType, foods, or totalMacros cannot be empty.",
+    });
+  }
+
+  try {
+    const mealId = Math.floor(100000 + Math.random() * 900000); // Generates a 6-digit random number
+
+    const newMeal = new Meal({
+      mealId,
+      email,
+      name,
+      mealType,
+      foods,
+      totalMacros,
+    });
+
+    await newMeal.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Meal created successfully",
+      meal: newMeal,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error: " + error.message,
+    });
   }
 };
