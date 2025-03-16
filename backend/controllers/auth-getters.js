@@ -6,6 +6,13 @@ import ExerciseHistory from "../model/exerciseHistory.js";
 import UserMarcos from "../model/macros.js";
 import User from "../model/user.js";
 import Meal from "../model/meal.js";
+import xlsx from 'xlsx';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const getWorkouts = async (req, res) => {
   const { email } = req.params;
@@ -343,3 +350,47 @@ export const getDailyMacrosAggregate = async (req, res) => {
   }
 };
 
+export const getNutrition = async (req, res) => {
+  try {
+    const nutritionData = [];
+
+    // Correct path to the .xlsx file (no need for './data' twice)
+    const filePath = path.join(__dirname, '..', 'data', 'nutrition.xlsx'); // Adjust path to point to the correct file
+
+    // Read the Excel file
+    const workbook = xlsx.readFile(filePath);
+
+    // Assuming the data is in the first sheet
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    // Convert the sheet data into JSON, using the first row as headers
+    const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+
+    // Assuming the first row contains headers and starting from row 2 for data
+    for (let i = 1; i < sheetData.length; i++) {
+      const row = sheetData[i];
+
+      // Check if the row has data
+      if (row[0] && row[2] && row[38] && row[57] && row[69]) {
+        nutritionData.push({
+          food: row[1], // Column 0: Food
+          calories: row[2], // Column 2: Calories
+          protein: row[38], // Column 38: Protein
+          carbs: row[57], // Column 57: Carbs
+          fat: row[69], // Column 69: Fat
+        });
+      }
+    }
+
+    // Return the nutrition data as a response
+    res.status(200).json({
+      nutritionData
+    });
+  } catch (error) {
+    // Handle errors if something goes wrong
+    res.status(500).json({
+      success: false,
+      message: "Error reading the .xlsx file: " + error.message,
+    });
+  }
+};

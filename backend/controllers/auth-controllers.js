@@ -426,9 +426,9 @@ export const setHeightAndWeight = async (req, res) => {
 };
 
 export const addMeal = async (req, res) => {
-  const { email, name, mealType, foods, totalMacros } = req.body;
+  const { email, mealType, foods, totalMacros } = req.body;
 
-  if (!email || !name || !mealType || !foods || !Array.isArray(foods) || foods.length === 0 || !totalMacros) {
+  if (!email || !mealType || !foods || !Array.isArray(foods) || foods.length === 0 || !totalMacros) {
     return res.status(400).json({
       success: false,
       message: "Missing required fields: email, name, mealType, foods, or totalMacros cannot be empty.",
@@ -441,7 +441,6 @@ export const addMeal = async (req, res) => {
     const newMeal = new Meal({
       mealId,
       email,
-      name,
       mealType,
       foods,
       totalMacros,

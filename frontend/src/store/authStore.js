@@ -15,6 +15,7 @@ export const useAuthStore = create((set) => ({
   exerciseHistory: [],
   userDetails: [],
   currentMacros: [],
+  nutrition: [],
 
   signup: async (email, name, password) => {
     set({ isLoading: true, error: null });
@@ -659,6 +660,31 @@ export const useAuthStore = create((set) => ({
       const data = await response.json();
 
       set({isLoading: false, currentMacros: data})
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  getNutrition: async() => {
+    try {
+      const response = await fetch(
+        `${API_URL}/get-nutrition`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          }, 
+          credentials: "include",
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+
+      set({ isLoading: false, nutrition: data.nutritionData})
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;

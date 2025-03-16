@@ -8,11 +8,6 @@ const mealSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
     date: {
       type: Date,
       required: true,

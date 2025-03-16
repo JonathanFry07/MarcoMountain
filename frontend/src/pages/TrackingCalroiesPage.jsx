@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import DailyCalorieCalculator from "@/components/CalorieForm";
 import { useAuthStore } from "@/store/authStore";
 import { Save } from "lucide-react";
+import AddMealForm from "@/components/addMealForm";
 
 const TrackingCaloriesPage = () => {
   const [formVisible, setFormVisible] = useState(false);
+  const [mealFormVisible, setMealFormVisible] = useState(false);
   const [weight, setWeight] = useState(0);
   const [height, setHeight] = useState(0);
 
@@ -42,6 +44,10 @@ const TrackingCaloriesPage = () => {
   const toggleFormVisible = async () => {
     await getMarcos(user.email);
     setFormVisible(!formVisible);
+  }
+
+  const closeMealForm = () => {
+    setMealFormVisible(false);
   }
 
   return (
@@ -141,9 +147,14 @@ const TrackingCaloriesPage = () => {
 
         </Card>
       )}
-      <Card>
-        <button onClick={() => console.log("add")}>Add Meal</button>
-      </Card>
+
+      {!mealFormVisible ? (
+        <Card>
+          <button onClick={() =>  setMealFormVisible(!mealFormVisible)}>Add Meal</button>
+        </Card>) : 
+        (
+        <AddMealForm close={closeMealForm}/>
+      )}
     </div>
   );
 };
