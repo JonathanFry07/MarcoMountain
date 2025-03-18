@@ -13,6 +13,14 @@ import ProgressPage from './pages/ProgressPage';
 import TrackingCaloriesPage from './pages/TrackingCalroiesPage';
 import MealPage from './pages/MealPage';
 
+const ProtectRoute = ({ children }) => {
+  const { isAuthenticated, user } = useAuthStore();
+  if (!isAuthenticated && !user) {
+    return <Navigate to="/" replace/>;
+  }
+  return children
+};
+
 function App() {
 
   const { isCheckingAuth, checkAuth, isAuthenticated, user } = useAuthStore();
@@ -34,15 +42,15 @@ function App() {
       {/* Main Content Area (Scrolls between Logo and Bottom Navbar) */}
       {/* Adjusted padding-top to prevent overlap with the logo */}
       <div className="pt-28 sm:pt-36 pb-16 sm:pb-24 overflow-y-auto flex-grow">
-        <Routes>
+      <Routes>
           <Route path="/" element={<HomeLayoutPage />} />
-          <Route path="/workout" element={<WorkOutPage />} />
-          <Route path="/tracking" element={<TrackingPage />} />
-          <Route path="/tracking-workout/:id" element={<TrackingWorkoutPage />} /> 
-          <Route path="/recent-activity" element={<CalendarPage />} />
-          <Route path="/progress" element={<ProgressPage />} />
-          <Route path="/calories" element={<TrackingCaloriesPage /> } />
-          <Route path="/meals" element={<MealPage /> } />      
+          <Route path="/workout" element={<ProtectRoute><WorkOutPage /></ProtectRoute>} />
+          <Route path="/tracking" element={<ProtectRoute><TrackingPage /></ProtectRoute>} />
+          <Route path="/tracking-workout/:id" element={<ProtectRoute><TrackingWorkoutPage /></ProtectRoute>} />
+          <Route path="/recent-activity" element={<ProtectRoute><CalendarPage /></ProtectRoute>} />
+          <Route path="/progress" element={<ProtectRoute><ProgressPage /></ProtectRoute>} />
+          <Route path="/calories" element={<ProtectRoute><TrackingCaloriesPage /></ProtectRoute>} />
+          <Route path="/meals" element={<ProtectRoute><MealPage /></ProtectRoute>} />
         </Routes>
       </div>
 

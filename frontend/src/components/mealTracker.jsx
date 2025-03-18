@@ -61,13 +61,13 @@ const MealTracker = ({ meals = [] }) => {
     return (
         <div className="container bg-white max-w-md mx-auto px-4 py-6">
             <Tabs defaultValue="all" className="w-full">
-                <TabsList className="grid grid-cols-4 mb-4">
+                <TabsList className="flex justify-around mb-4">
                     <TabsTrigger value="all">All</TabsTrigger>
                     <TabsTrigger value="breakfast">Breakfast</TabsTrigger>
                     <TabsTrigger value="lunch">Lunch</TabsTrigger>
                     <TabsTrigger value="dinner">Dinner</TabsTrigger>
+                    <TabsTrigger value="snack">Snack</TabsTrigger>
                 </TabsList>
-
                 <TabsContent value="all">
                     {renderMeals(mealCategories.breakfast)}
                     {renderMeals(mealCategories.lunch)}
