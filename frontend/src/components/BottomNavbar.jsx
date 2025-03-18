@@ -7,7 +7,7 @@ const BottomNavbar = () => {
 
   const navItems = [
     { id: 'workout', label: 'Workout', icon: <Dumbbell />, to: '/workout' },
-    { id: 'meals', label: 'Meals', icon: <Utensils /> },
+    { id: 'meals', label: 'Meals', icon: <Utensils />, to: '/meals' },
     { id: 'home', label: 'Home', icon: <Home />, to: '/' },
     { id: 'track', label: 'Track', icon: <LineChart />, to : '/tracking'},
   ];

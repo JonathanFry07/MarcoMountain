@@ -426,7 +426,7 @@ export const setHeightAndWeight = async (req, res) => {
 };
 
 export const addMeal = async (req, res) => {
-  const { email, name ,mealType, foods, totalMacros } = req.body;
+  const { email, name, mealType, foods, totalMacros, ingredients, preparationSteps, prepTime } = req.body;
 
   if (!email || !name || !mealType || !foods || !Array.isArray(foods) || foods.length === 0 || !totalMacros) {
     return res.status(400).json({
@@ -436,7 +436,7 @@ export const addMeal = async (req, res) => {
   }
 
   try {
-    const mealId = Math.floor(100000 + Math.random() * 900000); // Generates a 6-digit random number
+    const mealId = Math.floor(100000 + Math.random() * 900000);
 
     const newMeal = new Meal({
       mealId,
@@ -445,6 +445,9 @@ export const addMeal = async (req, res) => {
       mealType,
       foods,
       totalMacros,
+      ingredients: ingredients || [],
+      preparationSteps: preparationSteps || [],
+      prepTime: prepTime || 0,  // Set prepTime if provided, else default to 0
     });
 
     await newMeal.save();

@@ -16,6 +16,7 @@ export const useAuthStore = create((set) => ({
   userDetails: [],
   currentMacros: [],
   nutrition: [],
+  meals: [],
 
   signup: async (email, name, password) => {
     set({ isLoading: true, error: null });
@@ -685,6 +686,31 @@ export const useAuthStore = create((set) => ({
       const data = await response.json();
 
       set({ isLoading: false, nutrition: data.nutritionData})
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  getMeals: async() => {
+    try {
+      const response = await fetch(
+        `${API_URL}/get-meals`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          }, 
+          credentials: "include",
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+
+      set({ isLoading: false, meals: data.meals})
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;

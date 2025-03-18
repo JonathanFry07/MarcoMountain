@@ -359,13 +359,10 @@ export const getDailyMacrosAggregate = async (req, res) => {
 export const getNutrition = async (req, res) => {
   try {
     const nutritionData = [];
-    // Adjust the path to point to your file
     const filePath = path.join(__dirname, '..', 'data', 'macro_nutrients_p2.xlsx');
 
-    // Read the Excel file
     const workbook = xlsx.readFile(filePath);
 
-    // Get the first sheet of the workbook
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
     // Convert the sheet data into JSON as an array of arrays (each row is an array)
@@ -387,13 +384,33 @@ export const getNutrition = async (req, res) => {
       });
     }
 
-    // Return the nutrition data as a JSON response
     res.status(200).json({ nutritionData });
   } catch (error) {
-    // Handle any errors that occur during file read/parsing
     res.status(500).json({
       success: false,
       message: "Error reading the .xlsx file: " + error.message,
+    });
+  }
+};
+
+export const getMealsForPage = async (req, res) => {
+  try {
+    const meals = await Meal.find({
+      $and: [
+        { "ingredients.0": { $exists: true } },
+        { "preparationSteps.0": { $exists: true } }
+      ]
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Meals fetched successfully",
+      meals,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error: " + error.message,
     });
   }
 };
