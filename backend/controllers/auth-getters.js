@@ -10,6 +10,7 @@ import xlsx from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import Posts from "../model/posts.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -411,6 +412,24 @@ export const getMealsForPage = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Server error: " + error.message,
+    });
+  }
+};
+
+export const getPosts = async (req, res) => {
+  try {
+    const posts = await Posts.find(); // Fetch all posts from DB
+
+    res.status(200).json({
+      success: true,
+      count: posts.length,
+      posts,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Server error: ${error.message}`,
     });
   }
 };

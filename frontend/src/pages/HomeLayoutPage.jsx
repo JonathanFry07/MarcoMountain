@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import { useAuthStore } from '../store/authStore';
 import LoginForm from '../components/LoginForm';
 import SignUpForm from '../components/SignUpForm';
+import SocialFeed from '@/components/socialFeed';
 
 const HomeLayoutPage = () => {
     const { isAuthenticated } = useAuthStore();
@@ -13,6 +14,7 @@ const HomeLayoutPage = () => {
             {isAuthenticated ? (
                 <>
                     <Outlet />
+                    <SocialFeed />
                 </>
             ) : (
                 <div className="min-h-screen bg-white flex flex-col justify-center items-center p-6">
