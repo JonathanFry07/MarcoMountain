@@ -667,6 +667,7 @@ export const useAuthStore = create((set) => ({
     }
   },
   getNutrition: async() => {
+    set({isLoading: true, error: null});
     try {
       const response = await fetch(
         `${API_URL}/get-nutrition`,
@@ -692,6 +693,7 @@ export const useAuthStore = create((set) => ({
     }
   },
   getMeals: async() => {
+    set({isLoading: true, error: null});
     try {
       const response = await fetch(
         `${API_URL}/get-meals`,
@@ -707,7 +709,7 @@ export const useAuthStore = create((set) => ({
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const data = await response.json();
 
       set({ isLoading: false, meals: data.meals})
