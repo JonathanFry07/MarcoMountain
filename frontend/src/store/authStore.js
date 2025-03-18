@@ -17,6 +17,7 @@ export const useAuthStore = create((set) => ({
   currentMacros: [],
   nutrition: [],
   meals: [],
+  posts: [],
 
   signup: async (email, name, password) => {
     set({ isLoading: true, error: null });
@@ -717,5 +718,75 @@ export const useAuthStore = create((set) => ({
       set({ isLoading: false, error: error.message });
       throw error;
     }
-  }
+  },
+  getPosts: async() => {
+    set({isLoading: true, error: null});
+    try {
+      const response = await fetch (`${API_URL}/get-posts`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          }, 
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      set({ isLoading: false, posts: data.posts})
+
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  addPosts: async(name, type, activity, title, duration, pace, distance, description, exercises) => {
+    set({isLoading: true, error: null});
+    try {
+      const response = await fetch(`${API_URL}/post-post`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({name, type, activity, title, duration, pace, distance, description, exercises}),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      set({isLoading: false, posts: result.posts })
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  addKudos: async(postId, email) => {
+    set({isLoading: true, error: null});
+    try {
+      const response = await fetch(`${API_URL}/${postId}/kudos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email}),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      set({isLoading: false })
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
 }));
