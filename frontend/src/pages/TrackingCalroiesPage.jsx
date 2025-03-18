@@ -62,6 +62,10 @@ const TrackingCaloriesPage = () => {
     setDate(newDate)
   }
 
+  const handleDateMacros = async (newDate) => {
+    await getDailyMacros(newDate);
+  }
+
   return (
     <div className="p-4 space-y-6">
       <Tabs defaultValue="metrics" className="w-full" onValueChange={setActiveTab}>
@@ -120,6 +124,23 @@ const TrackingCaloriesPage = () => {
           <Button className="w-full bg-cyan-500 hover:bg-cyan-600 text-white mt-6" onClick={toggleFormVisible}>
             {formVisible ? "Hide Macros Calculator" : "Calculate Macros"}
           </Button>
+
+          <div className="pt-4 flex justify-center mb-4">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn("w-[240px] justify-start text-left font-normal", !date && "text-muted-foreground")}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="center">
+                <Calendar mode="single" selected={date} onSelect={handleDateChange} initialFocus />
+              </PopoverContent>
+            </Popover>
+          </div>
 
           {formVisible ? (
             <DailyCalorieCalculator height={height} weight={weight} />
