@@ -613,7 +613,7 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  addMacros: async(email, name, mealType, foods, totalMacros) => {
+  postMeal: async(email, name, mealType, foods, totalMacros) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`${API_URL}/post-meal`,{
@@ -621,7 +621,7 @@ export const useAuthStore = create((set) => ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: json.stringify(email, name, mealType, foods, totalMacros)
+        body: JSON.stringify({email, name, mealType, foods, totalMacros})
       });
 
       if (!response.ok) {
@@ -683,8 +683,6 @@ export const useAuthStore = create((set) => ({
       }
   
       const data = await response.json();
-
-      console.log(data);
 
       set({ isLoading: false, nutrition: data.nutritionData})
     } catch (error) {

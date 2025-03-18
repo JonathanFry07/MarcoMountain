@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, StepBack } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+import MealTracker from './mealTracker';
 
 const AddMealForm = ({ close }) => {
     // Form states
@@ -11,7 +12,7 @@ const AddMealForm = ({ close }) => {
     const [quantity, setQuantity] = useState(100);
 
     // Get nutrition data from auth store
-    const { nutrition, getNutrition, isLoading } = useAuthStore();
+    const { nutrition, getNutrition, isLoading, user, postMeal } = useAuthStore();
 
     // Fetch nutrition data on component mount
     useEffect(() => {
@@ -28,11 +29,11 @@ const AddMealForm = ({ close }) => {
         carbs: 0,
         fat: 0
     });
+    const [mealName, setMealName] = useState(''); // Add meal name state
 
     // Helper function to parse nutrition values
     const parseNutritionValue = (value) => {
         if (typeof value === 'string') {
-            // Extract the number part from strings like "9.17 g"
             const match = value.match(/(\d+(\.\d+)?)/);
             return match ? parseFloat(match[0]) : 0;
         }
@@ -42,7 +43,7 @@ const AddMealForm = ({ close }) => {
     // Format nutrition data for internal use
     const formatNutritionData = (item) => {
         return {
-            id: item.food, // Using food name as ID
+            id: item.food,
             name: item.food,
             calories: parseNutritionValue(item.calories),
             protein: parseNutritionValue(item.protein),
@@ -66,25 +67,23 @@ const AddMealForm = ({ close }) => {
     }, [mealFoods]);
 
     const handleSearch = (event) => {
-        console.log(nutrition)
         const term = event.target.value;
         setSearchTerm(term);
         setIsSearching(true);
-    
+
         // Only search if term is not empty
         if (term.trim() === '') {
             setSearchResults([]);
             setIsSearching(false);
             return;
         }
-    
+
         // Filter the nutrition data based on the search term
-        // Limit results to the first 5 matches
         const results = (Array.isArray(nutrition) ? nutrition : [])
             .filter(food => food.food.toLowerCase().includes(term.toLowerCase()))
             .map(formatNutritionData)
             .slice(0, 5);  // Take only the first 5 results
-    
+
         setSearchResults(results);
         setIsSearching(false);
     };
@@ -96,9 +95,12 @@ const AddMealForm = ({ close }) => {
     };
 
     const handleQuantityChange = (event) => {
-        const value = parseFloat(event.target.value);
-        if (!isNaN(value) && value >= 0) {
-            setQuantity(value);
+        const value = event.target.value;
+
+        if (value === "") {
+            setQuantity(""); // Allow clearing input
+        } else if (!isNaN(value) && Number(value) >= 0) {
+            setQuantity(Number(value)); // Convert to number before setting state
         }
     };
 
@@ -132,21 +134,24 @@ const AddMealForm = ({ close }) => {
         setMealFoods(newFoods);
     };
 
-    const handleSaveMeal = () => {
+    const handleSaveMeal = async () => {
         if (mealFoods.length === 0) return;
 
         // Create meal object matching Mongoose schema
         const meal = {
-            mealId: Math.floor(Math.random() * 10000), // Just for demo purposes
-            email: "user@example.com", // In a real app, this would come from user authentication
+            mealId: Math.floor(Math.random() * 10000),
+            email: user.email,
             date: new Date(mealDate),
             mealType,
             foods: mealFoods,
-            totalMacros
+            totalMacros,
+            mealName // Include the meal name here
         };
 
-        // Log the meal object in console
+        // Post meal with the meal name as the second argument
+        await postMeal(user.email, mealName, mealType, mealFoods, totalMacros);
         console.log('Meal to be saved:', meal);
+        close();
     };
 
     return (
@@ -161,35 +166,54 @@ const AddMealForm = ({ close }) => {
             <div className="mb-6 p-4 border border-gray-200 rounded-lg">
                 <h3 className="text-lg font-medium mb-3">Meal Details</h3>
 
-                <div className="flex gap-4">
-                    <div className="flex-1">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Meal Type
-                        </label>
-                        <select
-                            className="w-full p-2 border border-gray-300 rounded-lg"
-                            value={mealType}
-                            onChange={(e) => setMealType(e.target.value)}
-                        >
-                            <option value="breakfast">Breakfast</option>
-                            <option value="lunch">Lunch</option>
-                            <option value="dinner">Dinner</option>
-                            <option value="snack">Snack</option>
-                        </select>
-                    </div>
+                <div className="mb-6 p-4 border border-gray-200 rounded-lg">
+                    <h3 className="text-lg font-medium mb-3">Meal Details</h3>
 
-                    <div className="flex-1">
+                    {/* Meal Name Input Above Date and Type */}
+                    <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Date
+                            Meal Name
                         </label>
                         <input
-                            type="date"
+                            type="text"
                             className="w-full p-2 border border-gray-300 rounded-lg"
-                            value={mealDate}
-                            onChange={(e) => setMealDate(e.target.value)}
+                            placeholder="Enter meal name"
+                            value={mealName}
+                            onChange={(e) => setMealName(e.target.value)}
                         />
                     </div>
+
+                    <div className="flex gap-4">
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Meal Type
+                            </label>
+                            <select
+                                className="w-full p-2 border border-gray-300 rounded-lg"
+                                value={mealType}
+                                onChange={(e) => setMealType(e.target.value)}
+                            >
+                                <option value="breakfast">Breakfast</option>
+                                <option value="lunch">Lunch</option>
+                                <option value="dinner">Dinner</option>
+                                <option value="snack">Snack</option>
+                            </select>
+                        </div>
+
+                        <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Date
+                            </label>
+                            <input
+                                type="date"
+                                className="w-full p-2 border border-gray-300 rounded-lg"
+                                value={mealDate}
+                                onChange={(e) => setMealDate(e.target.value)}
+                            />
+                        </div>
+                    </div>
                 </div>
+
             </div>
 
             {/* Food Search */}
@@ -232,25 +256,31 @@ const AddMealForm = ({ close }) => {
                             </div>
                         )}
 
-                        {searchResults.length > 0 && (
-                            <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 max-h-60 overflow-y-auto">
-                                {searchResults.map(food => (
-                                    <div
-                                        key={food.id}
-                                        className="p-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
-                                        onClick={() => handleSelectFood(food)}
-                                    >
-                                        <div className="font-medium">{food.name}</div>
-                                        <div className="flex gap-4 mt-1 text-sm">
-                                            <span className="text-gray-700">{food.calories} cal</span>
-                                            <span className="text-gray-700">{food.protein}g protein</span>
-                                            <span className="text-gray-700">{food.carbs}g carbs</span>
-                                            <span className="text-gray-700">{food.fat}g fat</span>
-                                        </div>
-                                        <div className="text-xs text-gray-500">per 100g</div>
-                                    </div>
-                                ))}
+                        {isLoading ? (
+                            <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
+                                Loading foods...
                             </div>
+                        ) : (
+                            searchResults.length > 0 && (
+                                <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 max-h-60 overflow-y-auto">
+                                    {searchResults.map(food => (
+                                        <div
+                                            key={food.id}
+                                            className="p-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                                            onClick={() => handleSelectFood(food)}
+                                        >
+                                            <div className="font-medium">{food.name}</div>
+                                            <div className="flex gap-4 mt-1 text-sm">
+                                                <span className="text-gray-700">{food.calories} cal</span>
+                                                <span className="text-gray-700">{food.protein}g protein</span>
+                                                <span className="text-gray-700">{food.carbs}g carbs</span>
+                                                <span className="text-gray-700">{food.fat}g fat</span>
+                                            </div>
+                                            <div className="text-xs text-gray-500">per 100g</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )
                         )}
                     </div>
                 </div>
@@ -263,8 +293,6 @@ const AddMealForm = ({ close }) => {
                             </label>
                             <input
                                 type="number"
-                                min="0"
-                                step="1"
                                 className="w-full p-2 border border-gray-300 rounded-lg"
                                 value={quantity}
                                 onChange={handleQuantityChange}

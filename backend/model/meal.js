@@ -8,6 +8,7 @@ const mealSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    name: { type: String, required: true },
     date: {
       type: Date,
       required: true,
@@ -22,7 +23,6 @@ const mealSchema = new mongoose.Schema(
       {
         name: { type: String, required: true },
         servingSize: { type: Number, required: true },
-        servingUnit: { type: String, required: true },
         calories: { type: Number, required: true },
         protein: { type: Number, required: true },
         carbs: { type: Number, required: true },

@@ -301,7 +301,7 @@ export const getUser = async (req, res) => {
 
 export const getDailyMacrosAggregate = async (req, res) => {
   const { email, date } = req.query;
-  
+
   // Validate query parameters
   if (!email || !date) {
     return res.status(400).json({
@@ -309,14 +309,21 @@ export const getDailyMacrosAggregate = async (req, res) => {
       message: "Missing email or date in query parameters.",
     });
   }
-  
+
   try {
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
     endOfDay.setHours(23, 59, 59, 999);
 
-    const result = await Meal.aggregate([
+    // Fetch meals for the given email and date
+    const meals = await Meal.find({
+      email,
+      date: { $gte: startOfDay, $lte: endOfDay },
+    }).select("-__v -_id");
+
+    // Aggregate total macros
+    const macrosResult = await Meal.aggregate([
       {
         $match: {
           email,
@@ -334,14 +341,14 @@ export const getDailyMacrosAggregate = async (req, res) => {
       },
     ]);
 
-    res.json(
-      result[0] || {
-        totalCalories: 0,
-        totalProtein: 0,
-        totalCarbs: 0,
-        totalFat: 0,
-      }
-    );
+    const macros = macrosResult[0] || {
+      totalCalories: 0,
+      totalProtein: 0,
+      totalCarbs: 0,
+      totalFat: 0,
+    };
+
+    res.json({ meals, macros });
   } catch (error) {
     return res.status(500).json({
       success: false,
@@ -349,45 +356,41 @@ export const getDailyMacrosAggregate = async (req, res) => {
     });
   }
 };
-
 export const getNutrition = async (req, res) => {
   try {
     const nutritionData = [];
-
-    // Correct path to the .xlsx file (no need for './data' twice)
-    const filePath = path.join(__dirname, '..', 'data', 'nutrition.xlsx'); // Adjust path to point to the correct file
+    // Adjust the path to point to your file
+    const filePath = path.join(__dirname, '..', 'data', 'macro_nutrients_p2.xlsx');
 
     // Read the Excel file
     const workbook = xlsx.readFile(filePath);
 
-    // Assuming the data is in the first sheet
+    // Get the first sheet of the workbook
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-    // Convert the sheet data into JSON, using the first row as headers
+    // Convert the sheet data into JSON as an array of arrays (each row is an array)
     const sheetData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
-    // Assuming the first row contains headers and starting from row 2 for data
+    // Loop through the rows starting from index 1 (skip the header row)
     for (let i = 1; i < sheetData.length; i++) {
       const row = sheetData[i];
+      
+      // Only include rows that have a food name (assumed to be in column 0)
+      if (!row[0]) continue;
 
-      // Check if the row has data
-      if (row[0] && row[2] && row[38] && row[57] && row[69]) {
-        nutritionData.push({
-          food: row[1], // Column 0: Food
-          calories: row[2], // Column 2: Calories
-          protein: row[38], // Column 38: Protein
-          carbs: row[57], // Column 57: Carbs
-          fat: row[69], // Column 69: Fat
-        });
-      }
+      nutritionData.push({
+        food: row[0],
+        calories: row[4] || 0,  // Assuming calories are in column 4
+        carbs: row[5] || 0,     // Assuming carbs are in column 5
+        fat: row[6] || 0,       // Assuming fat is in column 6
+        protein: row[7] || 0    // Assuming protein is in column 7
+      });
     }
 
-    // Return the nutrition data as a response
-    res.status(200).json({
-      nutritionData
-    });
+    // Return the nutrition data as a JSON response
+    res.status(200).json({ nutritionData });
   } catch (error) {
-    // Handle errors if something goes wrong
+    // Handle any errors that occur during file read/parsing
     res.status(500).json({
       success: false,
       message: "Error reading the .xlsx file: " + error.message,
