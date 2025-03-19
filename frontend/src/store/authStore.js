@@ -18,6 +18,7 @@ export const useAuthStore = create((set) => ({
   nutrition: [],
   meals: [],
   posts: [],
+  kudos: [],
 
   signup: async (email, name, password) => {
     set({ isLoading: true, error: null });
@@ -783,6 +784,48 @@ export const useAuthStore = create((set) => ({
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      set({isLoading: false })
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  getKudos: async(postId) => {
+    set({isLoading: true, error: null});
+    try {
+      const response = await fetch(`${API_URL}/get-kudos/${postId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      set({isLoading: false })
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  },
+  removeKudos: async(postId, email) => {
+    set({isLoading: true, error: null});
+    try {
+      const response = await fetch(`${API_URL}/delete-kudos/${postId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({email}),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       set({isLoading: false })
     } catch (error) {
       set({ isLoading: false, error: error.message });

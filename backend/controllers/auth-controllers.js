@@ -557,3 +557,41 @@ export const addKudos = async (req, res) => {
     res.status(500).json({ success: false, message: `Server error: ${error.message}` });
   }
 };
+
+export const removeKudos = async (req, res) => {
+  try {
+    const { postId } = req.params;
+    const { email } = req.body;
+    
+    if (!email || email.trim() === "") {
+      return res.status(400).json({ success: false, message: "Email is required" });
+    }
+    
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ success: false, message: "Invalid post ID" });
+    }
+    
+    const post = await Posts.findById(postId);
+    if (!post) {
+      return res.status(404).json({ success: false, message: "Post not found" });
+    }
+
+    if (!post.kudosGivenBy.includes(email)) {
+      return res.status(400).json({ success: false, message: "You have not given kudos to this post" });
+    }
+    
+    post.kudosGivenBy = post.kudosGivenBy.filter(userEmail => userEmail !== email);
+    
+    post.kudos -= 1;
+    
+    await post.save();
+    
+    res.status(200).json({
+      success: true,
+      message: "Kudos removed successfully",
+      post,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: `Server error: ${error.message}` });
+  }
+};

@@ -422,10 +422,26 @@ export const getPosts = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      count: posts.length,
       posts,
     });
 
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Server error: ${error.message}`,
+    });
+  }
+};
+
+export const getKudos = async (req, res) => {
+  const { postId } = req.params;
+  try {
+    const post = await Posts.findById(postId).select("kudosGivenBy -_id");
+
+    res.status(200).json({
+      success: true,
+      kudosGivenBy: post.kudosGivenBy 
+    });
   } catch (error) {
     res.status(500).json({
       success: false,
