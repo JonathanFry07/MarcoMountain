@@ -489,19 +489,41 @@ export const addMeal = async (req, res) => {
 
 export const addPost = async (req, res) => {
   try {
-    const { name, type, activity, title, duration, pace, distance, description, exercises } = req.body;
+    const { name, type, activity, title, duration, description, exercises, pace, distance } = req.body;
 
+    // Validate required fields
     for (const field of ["name", "type", "activity", "title", "duration", "description"]) {
       if (!req.body[field]) {
         return res.status(400).json({ success: false, message: `Missing required field: ${field}` });
       }
     }
 
-    if ((type === "weights" && (!exercises || exercises.length === 0)) || 
-        (type === "cardio" && (!pace || !distance))) {
-      return res.status(400).json({ success: false, message: `Missing required field for type: ${type}` });
+    // Validate exercises if type is 'weights'
+    if (type === "weights") {
+      if (!exercises || exercises.length === 0) {
+        return res.status(400).json({ success: false, message: "Missing exercises for weights type" });
+      }
+
+      // Validate each exercise
+      for (const exercise of exercises) {
+        if (!exercise.name || !Array.isArray(exercise.sets)) {
+          return res.status(400).json({ success: false, message: "Invalid exercise structure" });
+        }
+
+        for (const set of exercise.sets) {
+          if (typeof set.reps !== 'number' || typeof set.weight !== 'number') {
+            return res.status(400).json({ success: false, message: "Each set must contain 'reps' and 'weight' as numbers" });
+          }
+        }
+      }
     }
 
+    // Handle cardio type validation (optional)
+    if (type === "cardio" && (!pace || !distance)) {
+      return res.status(400).json({ success: false, message: "Missing required fields for cardio type" });
+    }
+
+    // Create new post in the database
     const newPost = await Posts.create({
       name,
       postType: type,
@@ -512,7 +534,7 @@ export const addPost = async (req, res) => {
       description,
       distance: type === "cardio" ? distance : undefined,
       pace: type === "cardio" ? pace : undefined,
-      exercises: type === "weights" ? exercises : [],
+      exercises: type === "weights" ? exercises : [], // Only add exercises if type is weights
     });
 
     res.status(201).json({ success: true, message: "Post created successfully", post: newPost });

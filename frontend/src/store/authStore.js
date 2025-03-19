@@ -208,13 +208,13 @@ export const useAuthStore = create((set) => ({
         },
         credentials: "include",
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const data = await response.json();
-  
+
       // Merge custom exercises into the existing exercises array.
       set((state) => ({
         isLoading: false,
@@ -225,7 +225,7 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  
+
   createWorkout: async (title, type, exercises, email) => {
     // Set loading state at the beginning of the request
     set({ isLoading: true, error: null });
@@ -427,7 +427,7 @@ export const useAuthStore = create((set) => ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({email, workoutTitle, type})
+        body: JSON.stringify({ email, workoutTitle, type }),
       });
       if (response.ok) {
         set({ isLoading: false, message: "Create history" });
@@ -469,7 +469,7 @@ export const useAuthStore = create((set) => ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({email})
+        body: JSON.stringify({ email }),
       });
       if (response.ok) {
         set({ isLoading: false, message: "Create history" });
@@ -480,14 +480,14 @@ export const useAuthStore = create((set) => ({
     }
   },
   setWorkoutTarget: async (email, workoutTarget) => {
-    set({ isLoading: true, error: null});
+    set({ isLoading: true, error: null });
     try {
       const response = await fetch(`${API_URL}/post-workout-target`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({email, workoutTarget})
+        body: JSON.stringify({ email, workoutTarget }),
       });
       if (response.ok) {
         set({ isLoading: false, message: "set workout target" });
@@ -503,27 +503,27 @@ export const useAuthStore = create((set) => ({
       // Encode URI components for special characters
       const encodedEmail = encodeURIComponent(email);
       const encodedName = encodeURIComponent(name);
-      
+
       const response = await fetch(
         `${API_URL}/get-exercise-user-history/?email=${encodedEmail}&name=${encodedName}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-          }, 
+          },
           credentials: "include",
         }
       );
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const data = await response.json();
-      
+
       // Important: Make sure we're extracting the history array correctly
       const historyData = data.history || [];
-      
+
       set({ isLoading: false, exercises: historyData });
       return historyData;
     } catch (error) {
@@ -534,12 +534,12 @@ export const useAuthStore = create((set) => ({
   upsertMacros: async (email, calories, protein, carbs, fat) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch (`${API_URL}/upsert-marcos`,{
+      const response = await fetch(`${API_URL}/upsert-marcos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({email, calories, protein, carbs, fat})
+        body: JSON.stringify({ email, calories, protein, carbs, fat }),
       });
 
       if (!response.ok) {
@@ -552,11 +552,11 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  getMarcos: async(email) => {
+  getMarcos: async (email) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch (`${API_URL}/get-marcos/${email}`, {
-        method: "GET", 
+      const response = await fetch(`${API_URL}/get-marcos/${email}`, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
@@ -575,14 +575,14 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  setWeightHeight: async(email, weight, height) => {
+  setWeightHeight: async (email, weight, height) => {
     try {
-      const response = await fetch (`${API_URL}/update-user`,{
+      const response = await fetch(`${API_URL}/update-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({email, weight, height})
+        body: JSON.stringify({ email, weight, height }),
       });
 
       if (!response.ok) {
@@ -595,11 +595,11 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  getUser: async(email) => {
+  getUser: async (email) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch (`${API_URL}/get-user/${email}`, {
-        method: "GET", 
+      const response = await fetch(`${API_URL}/get-user/${email}`, {
+        method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
@@ -618,15 +618,15 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  postMeal: async(email, name, mealType, foods, totalMacros) => {
+  postMeal: async (email, name, mealType, foods, totalMacros) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await fetch(`${API_URL}/post-meal`,{
+      const response = await fetch(`${API_URL}/post-meal`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({email, name, mealType, foods, totalMacros})
+        body: JSON.stringify({ email, name, mealType, foods, totalMacros }),
       });
 
       if (!response.ok) {
@@ -635,105 +635,97 @@ export const useAuthStore = create((set) => ({
 
       const result = await response.json();
 
-      set({isLoading: false, currentMacros: result })
+      set({ isLoading: false, currentMacros: result });
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
     }
   },
-  getDailyMacros: async(email, date) => {
-    set({isLoading: true, error: null});
+  getDailyMacros: async (email, date) => {
+    set({ isLoading: true, error: null });
     try {
       const encodedEmail = encodeURIComponent(email);
       const encodedDate = encodeURIComponent(date);
-      
+
       const response = await fetch(
         `${API_URL}/get-macros/?email=${encodedEmail}&date=${encodedDate}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-          }, 
+          },
           credentials: "include",
         }
       );
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const data = await response.json();
 
-      set({isLoading: false, currentMacros: data})
+      set({ isLoading: false, currentMacros: data });
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
     }
   },
-  getNutrition: async() => {
-    set({isLoading: true, error: null});
+  getNutrition: async () => {
+    set({ isLoading: true, error: null });
     try {
-      const response = await fetch(
-        `${API_URL}/get-nutrition`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          }, 
-          credentials: "include",
-        }
-      );
-  
+      const response = await fetch(`${API_URL}/get-nutrition`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-  
+
       const data = await response.json();
 
-      set({ isLoading: false, nutrition: data.nutritionData})
+      set({ isLoading: false, nutrition: data.nutritionData });
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
     }
   },
-  getMeals: async() => {
-    set({isLoading: true, error: null});
+  getMeals: async () => {
+    set({ isLoading: true, error: null });
     try {
-      const response = await fetch(
-        `${API_URL}/get-meals`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          }, 
-          credentials: "include",
-        }
-      );
-  
+      const response = await fetch(`${API_URL}/get-meals`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
 
-      set({ isLoading: false, meals: data.meals})
+      set({ isLoading: false, meals: data.meals });
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
     }
   },
-  getPosts: async() => {
-    set({isLoading: true, error: null});
+  getPosts: async () => {
+    set({ isLoading: true, error: null });
     try {
-      const response = await fetch (`${API_URL}/get-posts`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          }, 
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`${API_URL}/get-posts`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -741,22 +733,46 @@ export const useAuthStore = create((set) => ({
 
       const data = await response.json();
 
-      set({ isLoading: false, posts: data.posts})
-
+      set({ isLoading: false, posts: data.posts });
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
     }
   },
-  addPosts: async(name, type, activity, title, duration, pace, distance, description, exercises) => {
-    set({isLoading: true, error: null});
+  addPosts: async (
+    name,
+    type,
+    activity,
+    title,
+    duration,
+    pace,
+    distance,
+    description,
+    exercises
+  ) => {
+    set({ isLoading: true, error: null });
+
+    // Adjust values for optional fields based on type
+    const adjustedPace = type === "cardio" ? pace || null : null;
+    const adjustedExercises = type === "weights" ? exercises || [] : [];
+
     try {
       const response = await fetch(`${API_URL}/post-post`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({name, type, activity, title, duration, pace, distance, description, exercises}),
+        body: JSON.stringify({
+          name,
+          type,
+          activity,
+          title,
+          duration,
+          pace: adjustedPace,
+          distance,
+          description,
+          exercises: adjustedExercises,
+        }),
       });
 
       if (!response.ok) {
@@ -765,35 +781,38 @@ export const useAuthStore = create((set) => ({
 
       const result = await response.json();
 
-      set({isLoading: false, posts: result.posts })
+      if (result.success) {
+        set({ isLoading: false, posts: result.posts, error: null });
+      } else {
+        set({ isLoading: false, error: result.message });
+      }
     } catch (error) {
       set({ isLoading: false, error: error.message });
-      throw error;
     }
   },
-  addKudos: async(postId, email) => {
-    set({isLoading: true, error: null});
+  addKudos: async (postId, email) => {
+    set({ isLoading: true, error: null });
     try {
       const response = await fetch(`${API_URL}/${postId}/kudos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({email}),
+        body: JSON.stringify({ email }),
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      set({isLoading: false })
+      set({ isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
     }
   },
-  getKudos: async(postId) => {
-    set({isLoading: true, error: null});
+  getKudos: async (postId) => {
+    set({ isLoading: true, error: null });
     try {
       const response = await fetch(`${API_URL}/get-kudos/${postId}`, {
         method: "GET",
@@ -807,28 +826,28 @@ export const useAuthStore = create((set) => ({
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      set({isLoading: false })
+      set({ isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
     }
   },
-  removeKudos: async(postId, email) => {
-    set({isLoading: true, error: null});
+  removeKudos: async (postId, email) => {
+    set({ isLoading: true, error: null });
     try {
       const response = await fetch(`${API_URL}/delete-kudos/${postId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({email}),
+        body: JSON.stringify({ email }),
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
-      set({isLoading: false })
+
+      set({ isLoading: false });
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
@@ -844,21 +863,21 @@ export const useAuthStore = create((set) => ({
         },
         body: JSON.stringify({ food, calories, carbs, fat, protein }),
       });
-  
-      const data = await response.json(); 
-  
+
+      const data = await response.json();
+
       if (!response.ok) {
-        throw data; 
+        throw data;
       }
-  
-      set({ isLoading: false, success: true, exists: data.exists || false }); 
-      return data; 
+
+      set({ isLoading: false, success: true, exists: data.exists || false });
+      return data;
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
     }
   },
-  addComment: async(postId, name, comment) => {
+  addComment: async (postId, name, comment) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`${API_URL}/post-comment`, {
@@ -868,21 +887,21 @@ export const useAuthStore = create((set) => ({
         },
         body: JSON.stringify({ postId, name, comment }),
       });
-  
-      const data = await response.json(); 
-  
+
+      const data = await response.json();
+
       if (!response.ok) {
-        throw data; 
+        throw data;
       }
-  
-      set({ isLoading: false, comments: data.comments }); 
-      return data; 
+
+      set({ isLoading: false, comments: data.comments });
+      return data;
     } catch (error) {
       set({ isLoading: false, error: error.message });
-      throw error; 
+      throw error;
     }
   },
-  getComments: async(postId) => {
+  getComments: async (postId) => {
     set({ isLoading: true, error: null });
     try {
       const response = await fetch(`${API_URL}/get-comments/${postId}`, {
@@ -892,18 +911,22 @@ export const useAuthStore = create((set) => ({
         },
         credentials: "include",
       });
-  
-      const data = await response.json(); 
-  
+
+      const data = await response.json();
+
       if (!response.ok) {
-        throw data; 
+        throw data;
       }
-  
-      set({ isLoading: false, comments: data.comments, commentsCount: data.commentsCount }); 
-      return data; 
+
+      set({
+        isLoading: false,
+        comments: data.comments,
+        commentsCount: data.commentsCount,
+      });
+      return data;
     } catch (error) {
       set({ isLoading: false, error: error.message });
-      throw error; 
+      throw error;
     }
-  }
+  },
 }));

@@ -8,13 +8,19 @@ import ExerciseHistory from "@/components/exerciseHistory";
 
 const TrackingWorkoutPage = () => {
   const { id } = useParams();
-  const { workouts, getWorkoutById, finishWorkout, user, createWorkoutHistory, exerciseHistory, getExerciseHistory, getExerciseHistoryUserName } = useAuthStore();
+  const { workouts, getWorkoutById, finishWorkout, user, createWorkoutHistory, exerciseHistory, getExerciseHistory, getExerciseHistoryUserName, addPosts } = useAuthStore();
   const [trackingData, setTrackingData] = useState({});
   const [removedDefaultSets, setRemovedDefaultSets] = useState({});
   const [localExercises, setLocalExercises] = useState([]);
   const [replacementTarget, setReplacementTarget] = useState(null);
   const [exerciseSelectorVisible, setExerciseSelectorVisible] = useState(false);
   const [historyVisibility, setHistoryVisibility] = useState({});
+  const [workoutDescription, setWorkoutDescription] = useState("");
+  const [post, setPost] = useState(false);
+  const [activity, setActivity] = useState("");
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,6 +54,19 @@ const TrackingWorkoutPage = () => {
     ]);
     setExerciseSelectorVisible(false); // Hide the ExerciseSelector after adding exercise
   };
+
+  const calculateDuration = () => {
+    if (startTime && endTime) {
+      const start = new Date(`1970-01-01T${startTime}:00`);
+      const end = new Date(`1970-01-01T${endTime}:00`);
+  
+      const durationInMinutes = (end - start) / 1000 / 60;
+      return durationInMinutes >= 0 ? durationInMinutes : 0; 
+    }
+    return 0;
+  };
+  
+  
 
   // Updates input values for default sets, additional sets, and cardio fields
   const handleInputChange = (exerciseId, setIndex, field, value, isAdditional = false) => {
@@ -148,18 +167,23 @@ const TrackingWorkoutPage = () => {
   };
 
   const handleFinishWorkout = async () => {
+    // Calculate duration based on workout type
+    const duration = workoutType === "weights" ? calculateDuration() : (workoutType === "cardio" ? trackingData[exercises[0]._id]?.time || 0 : 0);
+  
     const results = exercises.map((exercise) => {
       const exerciseData = trackingData[exercise._id] || {};
       const visibleSetsCount = getVisibleSetsCount(exercise);
       const sets = [];
-      // Collect default sets.
+  
+      // Collect default sets
       for (let i = 0; i < visibleSetsCount; i++) {
         sets.push({
           reps: exerciseData.sets?.[i]?.reps || 0,
           weight: exerciseData.sets?.[i]?.weight || 0,
         });
       }
-      // Collect additional sets.
+  
+      // Collect additional sets
       if (exerciseData.additionalSets && exerciseData.additionalSets.length > 0) {
         exerciseData.additionalSets.forEach((set) => {
           sets.push({
@@ -168,24 +192,61 @@ const TrackingWorkoutPage = () => {
           });
         });
       }
+  
       return {
         name: exercise.name,
         sets: sets,
         ...(workoutType === "cardio" && {
-          distance: exerciseData.distance !== undefined ? exerciseData.distance : 0,
-          time: exerciseData.time !== undefined ? exerciseData.time : 0,
+          distance: exerciseData.distance ?? 0,
+          time: exerciseData.time ?? 0, // Cardio time is part of the exercise data
         }),
       };
     });
-
+  
+    // Ensure the distance and time values for cardio
+    const distanceValue = workoutType === "cardio" ? (results[0]?.distance || 0) : 0;
+    const timeValue = workoutType === "cardio" ? (results[0]?.time || 1) : 1; // Prevent division by 0
+    const paceValue = workoutType === "cardio" ? timeValue / distanceValue : null;
+  
+    // Format the post data
+    const formattedPostData = {
+      name: user?.name || "Default Name",
+      type: workoutType,
+      activity: activity || "Unknown Activity",
+      title: workoutTItle || "Untitled Workout",
+      duration: duration, // Set the calculated duration here
+      pace: workoutType === "cardio" ? paceValue : undefined,
+      distance: workoutType === "cardio" ? distanceValue : undefined,
+      description: workoutDescription || "No description provided",
+      exercises: workoutType === "weights" ? results : [],
+    };
+  
+    console.log("📤 Posting Data:", formattedPostData);
+  
     try {
+      // Always call these functions
       await finishWorkout(user.email, workoutType, results);
-      const resultHistory = await createWorkoutHistory(user.email, workoutTItle, workoutType);
-      console.log("history created", resultHistory);
+      await createWorkoutHistory(user.email, workoutTItle, workoutType);
+  
+      // Only post if "post" is checked
+      if (post) {
+        await addPosts(
+          formattedPostData.name,
+          formattedPostData.type,
+          formattedPostData.activity,
+          formattedPostData.title,
+          formattedPostData.duration,
+          formattedPostData.pace ?? null, 
+          formattedPostData.distance ?? null, 
+          formattedPostData.description,
+          formattedPostData.exercises
+        );
+      }
+  
       alert("Workout completed successfully!");
       navigate("/");
     } catch (error) {
-      console.log(error);
+      console.error("Error completing workout:", error);
       alert("Error completing workout.");
     }
   };
@@ -244,7 +305,52 @@ const TrackingWorkoutPage = () => {
     <div className="max-w-xl mx-auto p-4">
       {exercises.length > 0 ? (
         <div className="bg-white shadow rounded p-6">
+          {workoutType === "weights" &&        <div className="flex space-x-4 mb-6">
+          <div className="flex-1">
+            <label htmlFor="startTime" className="block text-lg font-medium mb-2">
+              Start Time:
+            </label>
+            <input
+              type="time"
+              id="startTime"
+              name="startTime"
+              value={startTime}
+              onChange={(e) => setStartTime(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+            />
+          </div>
+
+          <div className="flex-1">
+            <label htmlFor="endTime" className="block text-lg font-medium mb-2">
+              End Time:
+            </label>
+            <input
+              type="time"
+              id="endTime"
+              name="endTime"
+              value={endTime}
+              onChange={(e) => setEndTime(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-lg"
+              required
+            />
+          </div>
+        </div>}
           <h2 className="text-2xl font-bold mb-4">Workout Exercises</h2>
+          <div className="mt-4">
+            <label htmlFor="activity" className="block text-lg font-medium text-gray-700">
+              Activity
+            </label>
+            <input
+              type="text"
+              id="activity"
+              className="mt-2 p-2 border rounded-md w-full"
+              placeholder="Enter activity name..."
+              value={activity}
+              onChange={(e) => setActivity(e.target.value)}
+            />
+          </div>
+
           {exercises.map((exercise, index) => (
             <div key={exercise._id || index} className="mb-6">
               <div className="flex justify-between items-center">
@@ -430,7 +536,34 @@ const TrackingWorkoutPage = () => {
             </div>
           )}
 
+
           <div className="flex justify-end space-x-4 mt-6">
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                className="h-6 w-6 text-blue-600 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition duration-200 ease-in-out"
+                id="postCheckbox"
+                onChange={() => { setPost(!post) }}
+              />
+              <span className="text-gray-800 font-medium">Post</span>
+            </label>
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="workoutDescription" className="block text-lg font-medium text-gray-700">
+              Workout Description
+            </label>
+            <textarea
+              id="workoutDescription"
+              className="mt-2 p-2 border rounded-md w-full"
+              rows="4"
+              placeholder="Describe your workout..."
+              value={workoutDescription}
+              onChange={(e) => setWorkoutDescription(e.target.value)}
+              required
+            />
+
+
             <button
               className="bg-teal-500 text-white px-4 py-2 rounded-md hover:bg-teal-600"
               onClick={handleFinishWorkout}

@@ -9,23 +9,26 @@ const postSchema = new mongoose.Schema(
     },
     postType: { type: String, enum: ["cardio", "weights"], required: true },
     activity: { type: String, required: true },
-    title: { type: String, required: true },//input
+    title: { type: String, required: true }, // input
     distance: { type: Number },
     duration: { type: String, required: true },
     pace: { type: String },
     date: { type: String, required: true },
     description: { type: String, required: true },
     kudos: { type: Number, default: 0 },
-    commentCount: {type: Number, default: 0},
+    commentCount: { type: Number, default: 0 },
     exercises: [
       {
         name: { type: String, required: true },
-        sets: { type: String, required: true },
-        reps: { type: String, required: true },
-        weight: { type: String, required: true },
+        sets: [
+          {
+            reps: { type: Number, required: true },
+            weight: { type: Number, required: true },
+          },
+        ],
       },
     ],
-    kudosGivenBy: { type: [String], default: [] }
+    kudosGivenBy: { type: [String], default: [] },
   },
   { timestamps: true }
 );

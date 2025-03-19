@@ -74,7 +74,6 @@ function WorkoutCard({ workout }) {
   const navigate = useNavigate();
 
   const handleTrackClick = (id) => {
-    console.log("Tracking workout with ID:", id);
     navigate(`/tracking-workout/${id}`);
   };
 
