@@ -1,6 +1,7 @@
+import { useAuthStore } from '@/store/authStore';
 import React, { useState } from 'react';
 
-const FoodForm = ({close}) => {
+const FoodForm = ({ close }) => {
   // States to hold form data
   const [food, setFood] = useState('');
   const [calories, setCalories] = useState('');
@@ -9,8 +10,10 @@ const FoodForm = ({close}) => {
   const [protein, setProtein] = useState('');
   const [error, setError] = useState('');
 
+  const { createFood } = useAuthStore();
+
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validate inputs
@@ -28,7 +31,11 @@ const FoodForm = ({close}) => {
       protein,
     };
 
-    console.log('Form Submitted:', formData);
+    await createFood(food,
+      calories,
+      carbs,
+      fat,
+      protein)
     close();
     setError('');
   };

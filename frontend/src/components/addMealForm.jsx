@@ -11,7 +11,7 @@ const AddMealForm = ({ close }) => {
     const [isSearching, setIsSearching] = useState(false);
     const [selectedFood, setSelectedFood] = useState(null);
     const [quantity, setQuantity] = useState(100);
-    const [FoodFormVisibility, setFoodFormVisibility ] = useState(true)
+    const [FoodFormVisibility, setFoodFormVisibility] = useState(true)
 
     const { nutrition, getNutrition, isLoading, user, postMeal } = useAuthStore();
 
@@ -49,7 +49,6 @@ const AddMealForm = ({ close }) => {
         };
     };
 
-    // Update total macros whenever meal foods change
     useEffect(() => {
         const newTotalMacros = mealFoods.reduce((acc, food) => {
             return {
@@ -123,7 +122,7 @@ const AddMealForm = ({ close }) => {
         setSelectedFood(null);
         setSearchTerm('');
         setQuantity(100);
-        
+
     };
 
     const handleRemoveFood = (index) => {
@@ -153,7 +152,8 @@ const AddMealForm = ({ close }) => {
     };
 
     const toggleVisibility = () => {
-        setFoodFormVisibility(!FoodFormVisibility)
+        setFoodFormVisibility(!FoodFormVisibility);
+        getNutrition();
     }
 
     return (
@@ -164,10 +164,10 @@ const AddMealForm = ({ close }) => {
                 </button>
                 <h2 className="text-xl font-bold">Create a Meal</h2>
             </div>
-    
+
             <div className="mb-6 p-4 border border-gray-200 rounded-lg">
                 <h3 className="text-lg font-medium mb-3">Meal Details</h3>
-    
+
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Meal Name
@@ -180,7 +180,7 @@ const AddMealForm = ({ close }) => {
                         onChange={(e) => setMealName(e.target.value)}
                     />
                 </div>
-    
+
                 <div className="flex gap-4">
                     <div className="w-1/2">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -197,7 +197,7 @@ const AddMealForm = ({ close }) => {
                             <option value="snack">Snack</option>
                         </select>
                     </div>
-    
+
                     <div className="w-1/2">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Date
@@ -211,7 +211,7 @@ const AddMealForm = ({ close }) => {
                     </div>
                 </div>
             </div>
-    
+
             <div className="flex justify-center items-center p-2">
                 {/* Button to toggle the FoodForm visibility */}
                 <button
@@ -221,12 +221,12 @@ const AddMealForm = ({ close }) => {
                     Add new Food
                 </button>
             </div>
-    
+
             {/* Conditional rendering of the Food Form or Search Food */}
             {FoodFormVisibility ? (
                 <div className="mb-6 p-4 border border-gray-200 rounded-lg">
                     <h3 className="text-lg font-medium mb-3">Add Foods</h3>
-    
+
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Search Food
@@ -244,25 +244,25 @@ const AddMealForm = ({ close }) => {
                                     onChange={handleSearch}
                                 />
                             </div>
-    
+
                             {isLoading && (
                                 <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
                                     Loading foods...
                                 </div>
                             )}
-    
+
                             {isSearching && (
                                 <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
                                     Searching...
                                 </div>
                             )}
-    
+
                             {searchTerm && !isSearching && searchResults.length === 0 && !selectedFood && (
                                 <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
                                     No foods found
                                 </div>
                             )}
-    
+
                             {isLoading ? (
                                 <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
                                     Loading foods...
@@ -294,9 +294,9 @@ const AddMealForm = ({ close }) => {
                 </div>
             ) : (
                 // If FoodFormVisibility is false, show the FoodForm component
-                <FoodForm close={toggleVisibility}/>
+                <FoodForm close={toggleVisibility} />
             )}
-    
+
             {/* Show the selected food details */}
             {selectedFood && (
                 <>
@@ -311,7 +311,7 @@ const AddMealForm = ({ close }) => {
                             onChange={handleQuantityChange}
                         />
                     </div>
-    
+
                     <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                         <h3 className="font-medium mb-2">Nutrition Values</h3>
                         <div className="grid grid-cols-2 gap-2 text-sm">
@@ -333,21 +333,23 @@ const AddMealForm = ({ close }) => {
                             </div>
                         </div>
                     </div>
-    
-                    <button
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
-                        onClick={handleAddFood}
-                    >
-                        Add Food
-                    </button>
+
+                    <div className='p-2'>
+                        <button
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                            onClick={handleAddFood}
+                        >
+                            Add Food
+                        </button>
+                    </div>
                 </>
             )}
-    
+
             {/* Foods List */}
             {mealFoods.length > 0 && (
                 <div className="mb-6 p-4 border border-gray-200 rounded-lg">
                     <h3 className="text-lg font-medium mb-3">Added Foods</h3>
-    
+
                     <div className="space-y-2 mb-4">
                         {mealFoods.map((food, index) => (
                             <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
@@ -372,7 +374,7 @@ const AddMealForm = ({ close }) => {
                             </div>
                         ))}
                     </div>
-    
+
                     <div className="p-3 bg-blue-50 rounded-lg">
                         <h3 className="font-medium mb-2">Total Nutrition</h3>
                         <div className="grid grid-cols-2 gap-2">
@@ -396,7 +398,7 @@ const AddMealForm = ({ close }) => {
                     </div>
                 </div>
             )}
-    
+
             {/* Save Meal Button */}
             <button
                 className="w-full bg-gradient-to-br from-green-400 to-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-green-300"
@@ -407,7 +409,7 @@ const AddMealForm = ({ close }) => {
             </button>
         </div>
     );
-    
+
 }
 
 export default AddMealForm;
