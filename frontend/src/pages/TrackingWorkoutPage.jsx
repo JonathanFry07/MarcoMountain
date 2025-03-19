@@ -221,8 +221,6 @@ const TrackingWorkoutPage = () => {
       exercises: workoutType === "weights" ? results : [],
     };
   
-    console.log("📤 Posting Data:", formattedPostData);
-  
     try {
       // Always call these functions
       await finishWorkout(user.email, workoutType, results);

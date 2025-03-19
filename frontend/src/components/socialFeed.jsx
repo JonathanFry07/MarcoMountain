@@ -21,20 +21,20 @@ const SocialFeed = () => {
 
   useEffect(() => {
     const fetchKudos = async () => {
-      if (!posts.length || !user?.email) return;
-
+      if (!posts || !user?.email) return;
+  
       setIsLoading(true);
       const likedStatus = {};
-
+  
       for (const post of posts) {
         try {
           if (post.kudosGivenBy && Array.isArray(post.kudosGivenBy) && post.kudosGivenBy.includes(user.email)) {
             likedStatus[post._id] = true;
             continue;
           }
-
+  
           const response = await getKudos(post._id);
-
+  
           if (Array.isArray(response) && response.includes(user.email)) {
             likedStatus[post._id] = true;
           } else if (response && typeof response === 'object' && Array.isArray(response.kudosGivenBy)) {
@@ -50,13 +50,14 @@ const SocialFeed = () => {
           likedStatus[post._id] = false;
         }
       }
-
+  
       setLikedWorkouts(likedStatus);
       setIsLoading(false);
     };
-
+  
     fetchKudos();
   }, [posts, user, getKudos]);
+  
 
   const handleCommentChange = (e) => {
     setComment(e.target.value);
