@@ -1,7 +1,7 @@
 import express from "express";
-import { signup, login, logout, checkAuth, addWorkout, addExercise, finishWorkout, createWorkoutHistory, addRestDay, setWorkoutTarget, addCustomExercise, upsertUserMacros, setHeightAndWeight, addMeal, addPost, addKudos, removeKudos } from "../controllers/auth-controllers.js";
+import { signup, login, logout, checkAuth, addWorkout, addExercise, finishWorkout, createWorkoutHistory, addRestDay, setWorkoutTarget, addCustomExercise, upsertUserMacros, setHeightAndWeight, addMeal, addPost, addKudos, removeKudos} from "../controllers/auth-controllers.js";
 import { verifyToken } from "../middleware/verifyToken.js";
-import { getCustomExercises, getExerciseHistory, getExercises, getWorkoutHistory, getWorkouts, getWorkoutsById, getHistoryByEmailUser, getMarcos, getUser, getDailyMacrosAggregate, getNutrition, getMealsForPage, getPosts, getKudos } from "../controllers/auth-getters.js";
+import { getCustomExercises, getExerciseHistory, getExercises, getWorkoutHistory, getWorkouts, getWorkoutsById, getHistoryByEmailUser, getMarcos, getUser, getDailyMacrosAggregate, getNutrition, getMealsForPage, getPosts, getKudos, postNutrition } from "../controllers/auth-getters.js";
 
 const router = express.Router();
 
@@ -34,6 +34,8 @@ router.post('/post-meal', addMeal);
 router.post('/post-post', addPost);
 
 router.post('/:postId/kudos', addKudos);
+
+router.post('/post-nutrition', postNutrition);
 
 router.get('/check-auth', verifyToken, checkAuth);
 

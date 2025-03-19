@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, StepBack } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import MealTracker from './mealTracker';
+import FoodForm from './addFoodForm';
 
 const AddMealForm = ({ close }) => {
     // Form states
@@ -10,16 +11,14 @@ const AddMealForm = ({ close }) => {
     const [isSearching, setIsSearching] = useState(false);
     const [selectedFood, setSelectedFood] = useState(null);
     const [quantity, setQuantity] = useState(100);
+    const [FoodFormVisibility, setFoodFormVisibility ] = useState(true)
 
-    // Get nutrition data from auth store
     const { nutrition, getNutrition, isLoading, user, postMeal } = useAuthStore();
 
-    // Fetch nutrition data on component mount
     useEffect(() => {
         getNutrition();
     }, [getNutrition]);
 
-    // Meal states
     const [mealType, setMealType] = useState('breakfast');
     const [mealDate, setMealDate] = useState(new Date().toISOString().split('T')[0]);
     const [mealFoods, setMealFoods] = useState([]);
@@ -29,9 +28,8 @@ const AddMealForm = ({ close }) => {
         carbs: 0,
         fat: 0
     });
-    const [mealName, setMealName] = useState(''); // Add meal name state
+    const [mealName, setMealName] = useState('');
 
-    // Helper function to parse nutrition values
     const parseNutritionValue = (value) => {
         if (typeof value === 'string') {
             const match = value.match(/(\d+(\.\d+)?)/);
@@ -40,7 +38,6 @@ const AddMealForm = ({ close }) => {
         return value;
     };
 
-    // Format nutrition data for internal use
     const formatNutritionData = (item) => {
         return {
             id: item.food,
@@ -126,6 +123,7 @@ const AddMealForm = ({ close }) => {
         setSelectedFood(null);
         setSearchTerm('');
         setQuantity(100);
+        
     };
 
     const handleRemoveFood = (index) => {
@@ -154,6 +152,10 @@ const AddMealForm = ({ close }) => {
         close();
     };
 
+    const toggleVisibility = () => {
+        setFoodFormVisibility(!FoodFormVisibility)
+    }
+
     return (
         <div className="w-full max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
             <div className="flex items-center mb-4">
@@ -162,180 +164,190 @@ const AddMealForm = ({ close }) => {
                 </button>
                 <h2 className="text-xl font-bold">Create a Meal</h2>
             </div>
-
+    
             <div className="mb-6 p-4 border border-gray-200 rounded-lg">
                 <h3 className="text-lg font-medium mb-3">Meal Details</h3>
-
-                <div className="mb-6 p-4 border border-gray-200 rounded-lg">
-                    <h3 className="text-lg font-medium mb-3">Meal Details</h3>
-
-                    {/* Meal Name Input Above Date and Type */}
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Meal Name
-                        </label>
-                        <input
-                            type="text"
-                            className="w-full p-2 border border-gray-300 rounded-lg"
-                            placeholder="Enter meal name"
-                            value={mealName}
-                            onChange={(e) => setMealName(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="flex gap-4">
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Meal Type
-                            </label>
-                            <select
-                                className="w-full p-2 border border-gray-300 rounded-lg"
-                                value={mealType}
-                                onChange={(e) => setMealType(e.target.value)}
-                            >
-                                <option value="breakfast">Breakfast</option>
-                                <option value="lunch">Lunch</option>
-                                <option value="dinner">Dinner</option>
-                                <option value="snack">Snack</option>
-                            </select>
-                        </div>
-
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Date
-                            </label>
-                            <input
-                                type="date"
-                                className="w-full p-2 border border-gray-300 rounded-lg"
-                                value={mealDate}
-                                onChange={(e) => setMealDate(e.target.value)}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            {/* Food Search */}
-            <div className="mb-6 p-4 border border-gray-200 rounded-lg">
-                <h3 className="text-lg font-medium mb-3">Add Foods</h3>
-
+    
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Search Food
+                        Meal Name
                     </label>
-                    <div className="relative">
-                        <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                            <div className="pl-3">
-                                <Search className="text-gray-400" size={18} />
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Search foods..."
-                                className="w-full p-3 outline-none"
-                                value={searchTerm}
-                                onChange={handleSearch}
-                            />
-                        </div>
-
-                        {isLoading && (
-                            <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
-                                Loading foods...
-                            </div>
-                        )}
-
-                        {isSearching && (
-                            <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
-                                Searching...
-                            </div>
-                        )}
-
-                        {searchTerm && !isSearching && searchResults.length === 0 && !selectedFood && (
-                            <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
-                                No foods found
-                            </div>
-                        )}
-
-                        {isLoading ? (
-                            <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
-                                Loading foods...
-                            </div>
-                        ) : (
-                            searchResults.length > 0 && (
-                                <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 max-h-60 overflow-y-auto">
-                                    {searchResults.map(food => (
-                                        <div
-                                            key={food.id}
-                                            className="p-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
-                                            onClick={() => handleSelectFood(food)}
-                                        >
-                                            <div className="font-medium">{food.name}</div>
-                                            <div className="flex gap-4 mt-1 text-sm">
-                                                <span className="text-gray-700">{food.calories} cal</span>
-                                                <span className="text-gray-700">{food.protein}g protein</span>
-                                                <span className="text-gray-700">{food.carbs}g carbs</span>
-                                                <span className="text-gray-700">{food.fat}g fat</span>
-                                            </div>
-                                            <div className="text-xs text-gray-500">per 100g</div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )
-                        )}
+                    <input
+                        type="text"
+                        className="w-full p-2 border border-gray-300 rounded-lg"
+                        placeholder="Enter meal name"
+                        value={mealName}
+                        onChange={(e) => setMealName(e.target.value)}
+                    />
+                </div>
+    
+                <div className="flex gap-4">
+                    <div className="w-1/2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Meal Type
+                        </label>
+                        <select
+                            className="w-full p-2 text-lg border border-gray-300 rounded-lg"
+                            value={mealType}
+                            onChange={(e) => setMealType(e.target.value)}
+                        >
+                            <option value="breakfast">Breakfast</option>
+                            <option value="lunch">Lunch</option>
+                            <option value="dinner">Dinner</option>
+                            <option value="snack">Snack</option>
+                        </select>
+                    </div>
+    
+                    <div className="w-1/2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Date
+                        </label>
+                        <input
+                            type="date"
+                            className="w-full p-2 text-lg border border-gray-300 rounded-lg"
+                            value={mealDate}
+                            onChange={(e) => setMealDate(e.target.value)}
+                        />
                     </div>
                 </div>
-
-                {selectedFood && (
-                    <>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Quantity (grams)
-                            </label>
-                            <input
-                                type="number"
-                                className="w-full p-2 border border-gray-300 rounded-lg"
-                                value={quantity}
-                                onChange={handleQuantityChange}
-                            />
+            </div>
+    
+            <div className="flex justify-center items-center p-2">
+                {/* Button to toggle the FoodForm visibility */}
+                <button
+                    className="bg-gradient-to-br from-cyan-400 to-cyan-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg hover:scale-105 transition-all"
+                    onClick={() => setFoodFormVisibility(!FoodFormVisibility)} // Toggle visibility on click
+                >
+                    Add new Food
+                </button>
+            </div>
+    
+            {/* Conditional rendering of the Food Form or Search Food */}
+            {FoodFormVisibility ? (
+                <div className="mb-6 p-4 border border-gray-200 rounded-lg">
+                    <h3 className="text-lg font-medium mb-3">Add Foods</h3>
+    
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Search Food
+                        </label>
+                        <div className="relative">
+                            <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                                <div className="pl-3">
+                                    <Search className="text-gray-400" size={18} />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Search foods..."
+                                    className="w-full p-3 outline-none"
+                                    value={searchTerm}
+                                    onChange={handleSearch}
+                                />
+                            </div>
+    
+                            {isLoading && (
+                                <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
+                                    Loading foods...
+                                </div>
+                            )}
+    
+                            {isSearching && (
+                                <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
+                                    Searching...
+                                </div>
+                            )}
+    
+                            {searchTerm && !isSearching && searchResults.length === 0 && !selectedFood && (
+                                <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
+                                    No foods found
+                                </div>
+                            )}
+    
+                            {isLoading ? (
+                                <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 p-2 text-center text-gray-500">
+                                    Loading foods...
+                                </div>
+                            ) : (
+                                searchResults.length > 0 && (
+                                    <div className="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg z-10 max-h-60 overflow-y-auto">
+                                        {searchResults.map(food => (
+                                            <div
+                                                key={food.id}
+                                                className="p-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer"
+                                                onClick={() => handleSelectFood(food)}
+                                            >
+                                                <div className="font-medium">{food.name}</div>
+                                                <div className="flex gap-4 mt-1 text-sm">
+                                                    <span className="text-gray-700">{food.calories} cal</span>
+                                                    <span className="text-gray-700">{food.protein}g protein</span>
+                                                    <span className="text-gray-700">{food.carbs}g carbs</span>
+                                                    <span className="text-gray-700">{food.fat}g fat</span>
+                                                </div>
+                                                <div className="text-xs text-gray-500">per 100g</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )
+                            )}
                         </div>
-
-                        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                            <h3 className="font-medium mb-2">Nutrition Values</h3>
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span>Calories:</span>
-                                    <span className="font-medium">{(selectedFood.calories * quantity / 100).toFixed(1)} cal</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Protein:</span>
-                                    <span className="font-medium">{(selectedFood.protein * quantity / 100).toFixed(1)}g</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Carbs:</span>
-                                    <span className="font-medium">{(selectedFood.carbs * quantity / 100).toFixed(1)}g</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Fat:</span>
-                                    <span className="font-medium">{(selectedFood.fat * quantity / 100).toFixed(1)}g</span>
-                                </div>
+                    </div>
+                </div>
+            ) : (
+                // If FoodFormVisibility is false, show the FoodForm component
+                <FoodForm close={toggleVisibility}/>
+            )}
+    
+            {/* Show the selected food details */}
+            {selectedFood && (
+                <>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Quantity (grams)
+                        </label>
+                        <input
+                            type="number"
+                            className="w-full p-2 border border-gray-300 rounded-lg"
+                            value={quantity}
+                            onChange={handleQuantityChange}
+                        />
+                    </div>
+    
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                        <h3 className="font-medium mb-2">Nutrition Values</h3>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="flex justify-between">
+                                <span>Calories:</span>
+                                <span className="font-medium">{(selectedFood.calories * quantity / 100).toFixed(1)} cal</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Protein:</span>
+                                <span className="font-medium">{(selectedFood.protein * quantity / 100).toFixed(1)}g</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Carbs:</span>
+                                <span className="font-medium">{(selectedFood.carbs * quantity / 100).toFixed(1)}g</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Fat:</span>
+                                <span className="font-medium">{(selectedFood.fat * quantity / 100).toFixed(1)}g</span>
                             </div>
                         </div>
-
-                        <button
-                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
-                            onClick={handleAddFood}
-                        >
-                            Add Food
-                        </button>
-                    </>
-                )}
-            </div>
-
+                    </div>
+    
+                    <button
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                        onClick={handleAddFood}
+                    >
+                        Add Food
+                    </button>
+                </>
+            )}
+    
             {/* Foods List */}
             {mealFoods.length > 0 && (
                 <div className="mb-6 p-4 border border-gray-200 rounded-lg">
                     <h3 className="text-lg font-medium mb-3">Added Foods</h3>
-
+    
                     <div className="space-y-2 mb-4">
                         {mealFoods.map((food, index) => (
                             <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
@@ -360,7 +372,7 @@ const AddMealForm = ({ close }) => {
                             </div>
                         ))}
                     </div>
-
+    
                     <div className="p-3 bg-blue-50 rounded-lg">
                         <h3 className="font-medium mb-2">Total Nutrition</h3>
                         <div className="grid grid-cols-2 gap-2">
@@ -384,10 +396,10 @@ const AddMealForm = ({ close }) => {
                     </div>
                 </div>
             )}
-
+    
             {/* Save Meal Button */}
             <button
-                className="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-green-300"
+                className="w-full bg-gradient-to-br from-green-400 to-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:bg-green-300"
                 disabled={mealFoods.length === 0}
                 onClick={handleSaveMeal}
             >
@@ -395,6 +407,7 @@ const AddMealForm = ({ close }) => {
             </button>
         </div>
     );
+    
 }
 
 export default AddMealForm;

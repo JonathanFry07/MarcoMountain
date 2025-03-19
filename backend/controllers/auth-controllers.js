@@ -10,6 +10,9 @@ import UserMarcos from "../model/macros.js";
 import Meal from "../model/meal.js";
 import Posts from "../model/posts.js";
 import mongoose from "mongoose";
+import XLSX from 'xlsx';
+import fs from 'fs';
+import path from 'path';
 
 export const signup = async (req, res) => {
   const { email, name, password } = req.body;
@@ -595,3 +598,4 @@ export const removeKudos = async (req, res) => {
     res.status(500).json({ success: false, message: `Server error: ${error.message}` });
   }
 };
+

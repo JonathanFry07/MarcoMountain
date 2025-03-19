@@ -832,4 +832,30 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
+  createFood: async ( food, calories, carbs, fat, protein) => {
+    set({isLoading: true, error: null});
+    try {
+      const response = await fetch(
+        `${API_URL}/post-nutrition`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          }, 
+          body: JSON.stringify({food, calories, carbs, fat, protein}),
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+
+      set({ isLoading: false, success:true})
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error;
+    }
+  }
 }));

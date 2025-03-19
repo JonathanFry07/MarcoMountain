@@ -449,3 +449,66 @@ export const getKudos = async (req, res) => {
     });
   }
 };
+
+export const postNutrition = async (req, res) => {
+  try {
+    const { food, calories, carbs, fat, protein } = req.body;
+
+    // Validate required fields
+    if (!food || calories === undefined || carbs === undefined || 
+        fat === undefined || protein === undefined) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Missing required fields: food, calories, carbs, fat, protein" 
+      });
+    }
+
+    // Validate numeric values
+    const caloriesNum = Number(calories);
+    const carbsNum = Number(carbs);
+    const fatNum = Number(fat);
+    const proteinNum = Number(protein);
+    
+    if (isNaN(caloriesNum) || isNaN(carbsNum) || isNaN(fatNum) || isNaN(proteinNum)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Invalid numeric values for calories, carbs, fat, or protein" 
+      });
+    }
+
+    const filePath = path.join(__dirname, '..', 'data', 'macro_nutrients_p2.xlsx');
+    const workbook = xlsx.readFile(filePath);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+
+    const sheetData = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
+
+    const numColumns = sheetData[0].length;
+
+    const newRow = new Array(numColumns).fill('');
+    newRow[0] = food;          
+    newRow[4] = caloriesNum;  
+    newRow[5] = carbsNum;  
+    newRow[6] = fatNum;  
+    newRow[7] = proteinNum;  
+
+    sheetData.push(newRow);
+
+    const updatedWorksheet = xlsx.utils.aoa_to_sheet(sheetData);
+    workbook.Sheets[sheetName] = updatedWorksheet;
+
+    xlsx.writeFile(workbook, filePath);
+
+    res.status(201).json({ 
+      success: true, 
+      message: "Nutrition entry added successfully",
+      newEntry: { food, calories: caloriesNum, carbs: carbsNum, fat: fatNum, protein: proteinNum }
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error updating spreadsheet: " + error.message,
+    });
+  }
+};
