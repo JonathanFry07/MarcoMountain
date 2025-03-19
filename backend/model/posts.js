@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-// Create a schema for the post post
 const postSchema = new mongoose.Schema(
   {
     name: {
@@ -17,6 +16,7 @@ const postSchema = new mongoose.Schema(
     date: { type: String, required: true },
     description: { type: String, required: true },
     kudos: { type: Number, default: 0 },
+    commentCount: {type: Number, default: 0},
     exercises: [
       {
         name: { type: String, required: true },

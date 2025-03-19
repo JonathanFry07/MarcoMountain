@@ -7,11 +7,13 @@ import { Tooltip } from './ui/tooltip';
 import { useAuthStore } from '@/store/authStore';
 
 const SocialFeed = () => {
-  const { posts, getPosts, user, addKudos, getKudos, removeKudos, getComments, comments, commentsCount } = useAuthStore();
+  const { posts, getPosts, user, addKudos, getKudos, removeKudos, getComments, comments, addComment } = useAuthStore();
   const [likedWorkouts, setLikedWorkouts] = useState({});
   const [isLoading, setIsLoading] = useState(true);
-  // Change: using an object for independent comment visibility per post
+  const [comment, setComment] = useState("");
   const [commentVisibility, setCommentVisibility] = useState({});
+  const [postComments, setPostComments] = useState({});
+  const [loadingComments, setLoadingComments] = useState({});
 
   useEffect(() => {
     getPosts();
@@ -56,6 +58,10 @@ const SocialFeed = () => {
     fetchKudos();
   }, [posts, user, getKudos]);
 
+  const handleCommentChange = (e) => {
+    setComment(e.target.value);
+  };
+
   const handleLike = async (id) => {
     if (likedWorkouts[id]) {
       try {
@@ -72,6 +78,45 @@ const SocialFeed = () => {
     }
   };
 
+  const createComment = async (postId) => {
+    if (!comment.trim()) return;
+    
+    try {
+      await addComment(postId, user.name, comment);
+      setComment("");
+      await getPosts();
+      
+      // Refresh comments for this post
+      fetchComments(postId);
+    } catch (error) {
+      console.error("Error adding comment:", error);
+    }
+  };
+
+  const fetchComments = async (postId) => {
+    setLoadingComments(prev => ({ ...prev, [postId]: true }));
+    
+    try {
+      const result = await getComments(postId);
+      if (result && result.comments) {
+        setPostComments(prev => ({ ...prev, [postId]: result.comments }));
+      }
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+    } finally {
+      setLoadingComments(prev => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  const toggleCommentSection = async (postId) => {
+    const newVisibility = !commentVisibility[postId];
+    setCommentVisibility(prev => ({ ...prev, [postId]: newVisibility }));
+    
+    if (newVisibility && (!postComments[postId] || !postComments[postId].length)) {
+      fetchComments(postId);
+    }
+  };
+
   const getInitials = (name) => {
     if (!name) return "U";
     return name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -79,6 +124,17 @@ const SocialFeed = () => {
 
   const isPostLiked = (postId) => {
     return !!likedWorkouts[postId];
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
   };
 
   const renderCardContent = (workout) => {
@@ -126,6 +182,10 @@ const SocialFeed = () => {
       <div className="pt-2 pb-20">
         {posts.sort((a, b) => new Date(b.date) - new Date(a.date)).map(workout => {
           const isLiked = isPostLiked(workout._id);
+          const showComments = commentVisibility[workout._id];
+          const hasComments = postComments[workout._id] && postComments[workout._id].length > 0;
+          const isLoadingComments = loadingComments[workout._id];
+          
           return (
             <Card key={workout._id} className="mb-3 shadow-sm">
               <div className="p-3 flex items-center">
@@ -177,7 +237,7 @@ const SocialFeed = () => {
                           fill={isLiked ? '#ef4444' : 'none'}
                           strokeWidth={1.5}
                         />
-                        <span className={`ml-1 text-xs ${isLiked ? 'text-red-500' : 'text-gray-500'}`}>
+                        <span className={`text-xs ${isLiked ? 'text-red-500' : 'text-gray-500'}`}>
                           {workout.kudos}
                         </span>
                       </Button>
@@ -185,25 +245,72 @@ const SocialFeed = () => {
                     <Button
                       variant="ghost"
                       className="hover:bg-transparent"
-                      // Toggle only this post's comment visibility
-                      onClick={() => setCommentVisibility(prev => ({ ...prev, [workout._id]: !prev[workout._id] }))}
+                      onClick={() => toggleCommentSection(workout._id)}
                     >
-                      <MessageSquare className="h-5 w-5 text-gray-500" />
+                      <MessageSquare className="h-5 w-4 text-gray-500" />
+                      {workout.commentCount > 0 && (
+                        <span className="text-xs text-gray-500">
+                          {workout.commentCount}
+                        </span>
+                      )}
                     </Button>
-                    {commentVisibility[workout._id] && (
-                      <>
-                        <input
-                          id={`comment-${workout._id}`}
-                          type="text"
-                          className="ml-2 border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
-                          placeholder="Add a comment..."
-                        />
-                        <ArrowRight className="ml-1 h-5 w-5 cursor-pointer text-cyan-400 hover:text-blue-400 transition-colors duration-150" />
-                      </>
-                    )}
                   </div>
                 </div>
               </div>
+              
+              {showComments && (
+                <div className="px-3 pb-3 border-t border-gray-100">
+                  {/* Comment input */}
+                  <div className="flex items-center mt-2 mb-3">
+                    <Avatar className="h-6 w-6 bg-gray-300 flex items-center justify-center text-gray-600 text-xs font-bold">
+                      {getInitials(user?.name)}
+                    </Avatar>
+                    <input
+                      type="text"
+                      value={comment}
+                      onChange={handleCommentChange}
+                      className="ml-2 flex-1 border border-gray-300 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
+                      placeholder="Add a comment..."
+                    />
+                    <Button 
+                      variant="ghost" 
+                      className="ml-1 p-1 h-auto"
+                      onClick={() => createComment(workout._id)}
+                      disabled={!comment.trim()}
+                    >
+                      <ArrowRight className="h-4 w-4 text-cyan-400 hover:text-blue-400" />
+                    </Button>
+                  </div>
+                  
+                  {/* Comments display */}
+                  {isLoadingComments && (
+                    <div className="flex justify-center py-2">
+                      <div className="animate-spin h-4 w-4 border-2 border-cyan-400 rounded-full border-t-transparent"></div>
+                    </div>
+                  )}
+                  
+                  {hasComments && !isLoadingComments && (
+                    <div className="space-y-2">
+                      {postComments[workout._id].map(comment => (
+                        <div key={comment._id} className="flex items-start">
+                          <Avatar className="h-6 w-6 bg-gray-300 flex items-center justify-center text-gray-600 text-xs font-bold">
+                            {getInitials(comment.name)}
+                          </Avatar>
+                          <div className="ml-2 flex-1">
+                            <div className="bg-gray-100 rounded-lg p-2">
+                              <div className="flex justify-between items-center">
+                                <span className="font-semibold text-xs">{comment.name}</span>
+                                <span className="text-gray-500 text-xs">{formatDate(comment.createdAt)}</span>
+                              </div>
+                              <p className="text-xs mt-1">{comment.comment}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </Card>
           );
         })}

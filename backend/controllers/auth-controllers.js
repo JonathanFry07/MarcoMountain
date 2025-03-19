@@ -599,17 +599,29 @@ export const removeKudos = async (req, res) => {
 
 export const addComment = async (req, res) => {
   const { postId, name, comment } = req.body;
+
   if (!postId || !name || !comment || comment.trim() === "") {
-    return res.status(400).json({ success: false, message: "Missing required fields: postId, email, and non-empty comment" });
+    return res.status(400).json({ success: false, message: "Missing required fields: postId, name, and non-empty comment" });
   }
+
   try {
     const newComment = await Comment.create({
       post: postId,
       name,
       comment: comment.trim(),
     });
+
+    const post = await Posts.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ success: false, message: "Post not found" });
+    }
+
+    post.commentCount = (post.commentCount || 0) + 1;
+    await post.save();
+
     res.status(201).json({ success: true, message: "Comment added successfully", comment: newComment });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error creating comment: " + error.message });
+    res.status(500).json({ success: false, message: "Error adding comment: " + error.message });
   }
 };
