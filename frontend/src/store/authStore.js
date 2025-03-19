@@ -19,6 +19,8 @@ export const useAuthStore = create((set) => ({
   meals: [],
   posts: [],
   kudos: [],
+  comments: [],
+  commentsCount: null,
 
   signup: async (email, name, password) => {
     set({ isLoading: true, error: null });
@@ -832,30 +834,76 @@ export const useAuthStore = create((set) => ({
       throw error;
     }
   },
-  createFood: async ( food, calories, carbs, fat, protein) => {
-    set({isLoading: true, error: null});
+  createFood: async (food, calories, carbs, fat, protein) => {
+    set({ isLoading: true, error: null });
     try {
-      const response = await fetch(
-        `${API_URL}/post-nutrition`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          }, 
-          body: JSON.stringify({food, calories, carbs, fat, protein}),
-        }
-      );
+      const response = await fetch(`${API_URL}/post-nutrition`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ food, calories, carbs, fat, protein }),
+      });
+  
+      const data = await response.json(); 
   
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw data; 
       }
   
-      const data = await response.json();
-
-      set({ isLoading: false, success:true})
+      set({ isLoading: false, success: true, exists: data.exists || false }); 
+      return data; 
     } catch (error) {
       set({ isLoading: false, error: error.message });
       throw error;
+    }
+  },
+  addComment: async(postId, name, comment) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`${API_URL}/post-comment`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ postId, name, comment }),
+      });
+  
+      const data = await response.json(); 
+  
+      if (!response.ok) {
+        throw data; 
+      }
+  
+      set({ isLoading: false, comments: data.comments }); 
+      return data; 
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error; 
+    }
+  },
+  getComments: async(postId) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await fetch(`${API_URL}/get-comments/${postId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+  
+      const data = await response.json(); 
+  
+      if (!response.ok) {
+        throw data; 
+      }
+  
+      set({ isLoading: false, comments: data.comments, commentsCount: data.commentsCount }); 
+      return data; 
+    } catch (error) {
+      set({ isLoading: false, error: error.message });
+      throw error; 
     }
   }
 }));

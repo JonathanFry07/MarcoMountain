@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, MessageSquare, Zap, Dumbbell } from 'lucide-react';
+import { Heart, MessageSquare, Zap, Dumbbell, ArrowRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Avatar } from './ui/avatar';
@@ -7,9 +7,11 @@ import { Tooltip } from './ui/tooltip';
 import { useAuthStore } from '@/store/authStore';
 
 const SocialFeed = () => {
-  const { posts, getPosts, user, addKudos, getKudos, removeKudos } = useAuthStore();
+  const { posts, getPosts, user, addKudos, getKudos, removeKudos, getComments, comments, commentsCount } = useAuthStore();
   const [likedWorkouts, setLikedWorkouts] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  // Change: using an object for independent comment visibility per post
+  const [commentVisibility, setCommentVisibility] = useState({});
 
   useEffect(() => {
     getPosts();
@@ -180,10 +182,25 @@ const SocialFeed = () => {
                         </span>
                       </Button>
                     </Tooltip>
-                    <Button variant="ghost" className="hover:bg-transparent">
+                    <Button
+                      variant="ghost"
+                      className="hover:bg-transparent"
+                      // Toggle only this post's comment visibility
+                      onClick={() => setCommentVisibility(prev => ({ ...prev, [workout._id]: !prev[workout._id] }))}
+                    >
                       <MessageSquare className="h-5 w-5 text-gray-500" />
-                      <span className="ml-1 text-xs text-gray-500"></span>
                     </Button>
+                    {commentVisibility[workout._id] && (
+                      <>
+                        <input
+                          id={`comment-${workout._id}`}
+                          type="text"
+                          className="ml-2 border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 transition duration-150 ease-in-out"
+                          placeholder="Add a comment..."
+                        />
+                        <ArrowRight className="ml-1 h-5 w-5 cursor-pointer text-cyan-400 hover:text-blue-400 transition-colors duration-150" />
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

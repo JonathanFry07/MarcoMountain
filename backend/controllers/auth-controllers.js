@@ -10,9 +10,7 @@ import UserMarcos from "../model/macros.js";
 import Meal from "../model/meal.js";
 import Posts from "../model/posts.js";
 import mongoose from "mongoose";
-import XLSX from 'xlsx';
-import fs from 'fs';
-import path from 'path';
+import Comment from "../model/comments.js";
 
 export const signup = async (req, res) => {
   const { email, name, password } = req.body;
@@ -599,3 +597,19 @@ export const removeKudos = async (req, res) => {
   }
 };
 
+export const addComment = async (req, res) => {
+  const { postId, name, comment } = req.body;
+  if (!postId || !name || !comment || comment.trim() === "") {
+    return res.status(400).json({ success: false, message: "Missing required fields: postId, email, and non-empty comment" });
+  }
+  try {
+    const newComment = await Comment.create({
+      post: postId,
+      name,
+      comment: comment.trim(),
+    });
+    res.status(201).json({ success: true, message: "Comment added successfully", comment: newComment });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error creating comment: " + error.message });
+  }
+};

@@ -11,6 +11,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import Posts from "../model/posts.js";
+import Comment from "../model/comments.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -463,44 +464,55 @@ export const postNutrition = async (req, res) => {
       });
     }
 
-    // Validate numeric values
+    // Convert to numbers and validate
     const caloriesNum = Number(calories);
     const carbsNum = Number(carbs);
     const fatNum = Number(fat);
     const proteinNum = Number(protein);
     
-    if (isNaN(caloriesNum) || isNaN(carbsNum) || isNaN(fatNum) || isNaN(proteinNum)) {
+    if ([caloriesNum, carbsNum, fatNum, proteinNum].some(isNaN)) {
       return res.status(400).json({ 
         success: false, 
         message: "Invalid numeric values for calories, carbs, fat, or protein" 
       });
     }
 
-    const filePath = path.join(__dirname, '..', 'data', 'macro_nutrients_p2.xlsx');
+    // Define file path
+    const filePath = path.resolve(__dirname, '..', 'data', 'macro_nutrients_p2.xlsx');
     const workbook = xlsx.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-
     const sheetData = xlsx.utils.sheet_to_json(worksheet, { header: 1 });
 
-    const numColumns = sheetData[0].length;
+    // Check if food already exists
+    const foodExists = sheetData.some(row => row[0]?.toLowerCase() === food.toLowerCase());
 
+    if (foodExists) {
+      return res.status(200).json({
+        success: true,  // Change to true so frontend knows request was handled
+        exists: true,   // Additional flag for frontend to differentiate cases
+        message: `Food item "${food}" already exists in the sheet.`
+      });
+    }
+
+    // Append new data
+    const numColumns = sheetData[0].length;
     const newRow = new Array(numColumns).fill('');
     newRow[0] = food;          
     newRow[4] = caloriesNum;  
     newRow[5] = carbsNum;  
     newRow[6] = fatNum;  
     newRow[7] = proteinNum;  
-
     sheetData.push(newRow);
 
+    // Update worksheet
     const updatedWorksheet = xlsx.utils.aoa_to_sheet(sheetData);
     workbook.Sheets[sheetName] = updatedWorksheet;
-
     xlsx.writeFile(workbook, filePath);
 
     res.status(201).json({ 
       success: true, 
+      exists: false, // Additional flag for clarity
       message: "Nutrition entry added successfully",
       newEntry: { food, calories: caloriesNum, carbs: carbsNum, fat: fatNum, protein: proteinNum }
     });
@@ -510,5 +522,23 @@ export const postNutrition = async (req, res) => {
       success: false,
       message: "Error updating spreadsheet: " + error.message,
     });
+  }
+};
+
+export const getCommentsByPost = async (req, res) => {
+  const { postId } = req.params;
+  if (!postId) {
+    return res.status(400).json({ success: false, message: "postId is required" });
+  }
+  try {
+    const comments = await Comment.find({ post: postId })
+      .sort({ createdAt: -1 })
+      .select('createdAt name comment'); 
+
+    const commentsCount = await Comment.countDocuments({ post: postId });
+
+    res.status(200).json({ success: true, comments, commentsCount });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching comments: " + error.message });
   }
 };

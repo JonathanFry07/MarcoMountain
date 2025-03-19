@@ -15,30 +15,33 @@ const FoodForm = ({ close }) => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     // Validate inputs
     if (!food || !calories || !carbs || !fat || !protein) {
       setError('All fields are required!');
       return;
     }
-
-    // Form data processing logic here
-    const formData = {
-      food,
-      calories,
-      carbs,
-      fat,
-      protein,
-    };
-
-    await createFood(food,
-      calories,
-      carbs,
-      fat,
-      protein)
-    close();
-    setError('');
+  
+    try {
+      const response = await createFood(food, calories, carbs, fat, protein);
+    
+      if (response.exists) {  
+        setError(`Food item '${food}' already exists.`);
+        return;
+      }
+    
+      close();
+      setError('');
+    } catch (error) {
+      if (error.response && error.response.data) {
+        setError(error.response.data.message || 'Something went wrong. Please try again.');
+      } else {
+        setError('An unexpected error occurred.');
+      }
+    }
+    
   };
+  
 
   return (
     <div className="w-full max-w-sm mx-auto bg-white p-4 rounded-lg shadow-md">
