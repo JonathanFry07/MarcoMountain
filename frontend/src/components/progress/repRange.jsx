@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -13,16 +13,24 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Filler);
 
 const RepRangeAnalysis = ({ data = [], showDropdown = true }) => {
-  const [selectedExercise, setSelectedExercise] = useState("Bench Press");
+  const [selectedExercise, setSelectedExercise] = useState(null);
 
-  if (!data || data.length === 0) {
-    return <div>No data available</div>;
+  useEffect(() => {
+    if (!selectedExercise && data.length > 0) {
+      const exercisesWithoutCardio = data.filter((exercise) => !exercise.distance);
+      const exerciseNames = Array.from(new Set(exercisesWithoutCardio.map((item) => item.name)));
+      if (exerciseNames.length > 0) {
+        setSelectedExercise(exerciseNames[0]);
+      }
+    }
+  }, [data, selectedExercise]);
+
+  if (!data || data.length === 0 || !selectedExercise) {
+    return <div>Loading chart...</div>;
   }
 
   const exercisesWithoutCardio = data.filter((exercise) => !exercise.distance);
-
   const exerciseNames = Array.from(new Set(exercisesWithoutCardio.map((item) => item.name)));
-
   const filteredSessions = exercisesWithoutCardio.filter(
     (session) => session.name === selectedExercise
   );
@@ -76,7 +84,7 @@ const RepRangeAnalysis = ({ data = [], showDropdown = true }) => {
       },
     },
     animation: {
-      duration: 300, 
+      duration: 300,
     },
   };
 
@@ -84,7 +92,7 @@ const RepRangeAnalysis = ({ data = [], showDropdown = true }) => {
     <div className="bg-white p-4 rounded-lg shadow">
       <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-lg font-medium">Reps per Set</h3>
-        {showDropdown && (
+        {showDropdown && exerciseNames.length > 0 && selectedExercise && (
           <select
             value={selectedExercise}
             onChange={(e) => setSelectedExercise(e.target.value)}
@@ -98,7 +106,9 @@ const RepRangeAnalysis = ({ data = [], showDropdown = true }) => {
           </select>
         )}
       </div>
-      {filteredSessions.length === 0 ? (
+      {!selectedExercise ? (
+        <div>Loading chart...</div>
+      ) : filteredSessions.length === 0 ? (
         <div>No sets data available for the selected exercise.</div>
       ) : (
         <div className="h-[180px]">

@@ -227,6 +227,7 @@ export const useAuthStore = create((set) => ({
   },
 
   createWorkout: async (title, type, exercises, email) => {
+    console.log(email)
     // Set loading state at the beginning of the request
     set({ isLoading: true, error: null });
 
@@ -248,7 +249,8 @@ export const useAuthStore = create((set) => ({
           const sets = Number(exercise.sets);
           const reps = Number(exercise.reps);
 
-          if (!exercise.exerciseId || isNaN(sets) || isNaN(reps)) {
+          console.log(exercise.exerciseId);
+          if ( isNaN(sets) || isNaN(reps)) {
             throw new Error("Invalid exercise data for weights");
           }
 
@@ -262,7 +264,7 @@ export const useAuthStore = create((set) => ({
         else if (type === "cardio") {
           const distance = Number(exercise.distance);
 
-          if (!exercise.exerciseId || isNaN(distance)) {
+          if ( isNaN(distance)) {
             throw new Error("Invalid exercise data for cardio");
           }
 
@@ -288,6 +290,7 @@ export const useAuthStore = create((set) => ({
         }),
       });
 
+      console.log(validatedExercises);
       // ... rest of your existing code
     } catch (error) {
       set({ isLoading: false, error: error.message });

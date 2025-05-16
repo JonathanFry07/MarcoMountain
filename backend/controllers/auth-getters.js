@@ -20,32 +20,9 @@ export const getWorkouts = async (req, res) => {
   const { email } = req.params;
   try {
     const workouts = await Workout.find({ email });
-
-    const exerciseIds = new Set();
-    workouts.forEach((workout) => {
-      workout.exercises.forEach((ex) => {
-        exerciseIds.add(ex.exerciseId);
-      });
-    });
-
-    const exercises = await Exercise.find({
-      id: { $in: Array.from(exerciseIds) },
-    });
-
-    const exerciseMap = {};
-    exercises.forEach((ex) => {
-      exerciseMap[ex.id] = ex.name;
-    });
-
-    const formattedWorkouts = workouts.map((workout) => {
-      const workoutObj = workout.toObject();
-      workoutObj.exercises = workoutObj.exercises.map((ex) => ({
-        ...ex,
-        name: exerciseMap[ex.exerciseId] || "Unknown",
-      }));
-      return workoutObj;
-    });
-
+    
+    const formattedWorkouts = workouts.map((workout) => workout.toObject());
+    
     return res.status(200).json({
       success: true,
       workouts: formattedWorkouts,
@@ -58,6 +35,7 @@ export const getWorkouts = async (req, res) => {
     });
   }
 };
+
 
 export const getWorkoutsById = async (req, res) => {
   const { id } = req.params;

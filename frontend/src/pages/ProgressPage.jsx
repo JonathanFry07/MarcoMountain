@@ -11,13 +11,18 @@ import DistanceAnalysis from "@/components/progress/distanceAnalysis";
 
 function ProgressPage() {
   const { user, exerciseHistory, getExerciseHistory } = useAuthStore();
+  const [loading, setLoading] = useState(true);
   const [latestTime, setLatestTime] = useState(null);
 
   useEffect(() => {
-    if (user && user.email) {
-      getExerciseHistory(user.email);
-    }
-  }, [user, exerciseHistory, getExerciseHistory]);
+    const fetchHistory = async () => {
+      if (user && user.email) {
+        await getExerciseHistory(user.email);
+        setLoading(false);
+      }
+    };
+    fetchHistory();
+  }, [user, getExerciseHistory]);
 
   useEffect(() => {
     if (exerciseHistory && exerciseHistory.length > 0) {
@@ -60,27 +65,34 @@ function ProgressPage() {
             </TabsList>
 
             <TabsContent value="strength" className="mt-4 space-y-4">
-              <div className="grid gap-4 bg-white p-2">
-                <h2 className="text-xl font-semibold text-cyan-600">Weight Progress</h2>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <WeightProgress data={exerciseHistory} />
-                </div>
-              </div>
+              {loading ? (
+                <div className="text-center text-cyan-500 font-semibold">Loading analysis...</div>
+              ) : (
+                <>
+                  <div className="grid gap-4 bg-white p-2">
+                    <h2 className="text-xl font-semibold text-cyan-600">Weight Progress</h2>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <WeightProgress data={exerciseHistory} />
+                    </div>
+                  </div>
 
-              <div className="grid gap-4 bg-white p-2">
-                <h2 className="text-xl font-semibold text-cyan-600">Rep Range Analysis</h2>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <RepRangeAnalysis data={exerciseHistory} />
-                </div>
-              </div>
+                  <div className="grid gap-4 bg-white p-2">
+                    <h2 className="text-xl font-semibold text-cyan-600">Rep Range Analysis</h2>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <RepRangeAnalysis data={exerciseHistory} />
+                    </div>
+                  </div>
 
-              <div className="grid gap-4 bg-white p-2">
-                <h2 className="text-xl font-semibold text-cyan-600">Volume Analysis</h2>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <VolumeProgress data={exerciseHistory} />
-                </div>
-              </div>
+                  <div className="grid gap-4 bg-white p-2">
+                    <h2 className="text-xl font-semibold text-cyan-600">Volume Analysis</h2>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <VolumeProgress data={exerciseHistory} />
+                    </div>
+                  </div>
+                </>
+              )}
             </TabsContent>
+
 
             <TabsContent value="cardio" className="mt-6">
               <div className="grid gap-4 bg-white p-2">

@@ -26,6 +26,7 @@ const AddWorkoutForm = ({ onClose }) => {
     }
 
     try {
+      console.log(title, type, exercises, user.email)
       const result = await createWorkout(title, type, exercises, user.email)
       console.log("Workout created successfully:", result)
       getWorkouts(user.email)

@@ -126,10 +126,10 @@ export const addWorkout = async (req, res) => {
 
   try {
     exercises.forEach((exercise) => {
-      if (!exercise.exerciseId || !exercise.name) {
+      if ( !exercise.name) {
         return res.status(400).json({
           success: false,
-          message: "Exercise ID and name are required",
+          message: " name are required",
         });
       }
 
