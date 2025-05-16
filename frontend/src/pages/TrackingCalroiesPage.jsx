@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button"
 import DailyCalorieCalculator from "@/components/CalorieForm"
 import { useAuthStore } from "@/store/authStore"
-import { CalendarIcon, Save } from "lucide-react"
+import { CalendarIcon, Save, ArrowLeftSquare } from "lucide-react"
 import AddMealForm from "@/components/addMealForm"
 import MealTracker from "@/components/mealTracker"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -12,6 +12,8 @@ import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { Link } from "react-router-dom"
+import BackToTracking from "@/components/BackToTracking"
 
 const TrackingCaloriesPage = () => {
   const [formVisible, setFormVisible] = useState(false)
@@ -20,6 +22,7 @@ const TrackingCaloriesPage = () => {
   const [height, setHeight] = useState(0)
   const [date, setDate] = useState(new Date())
   const [activeTab, setActiveTab] = useState("metrics")
+
 
   const { user, getMarcos, marcos, setWeightHeight, getUser, userDetails, getDailyMacros, currentMacros } =
     useAuthStore()
@@ -68,6 +71,7 @@ const TrackingCaloriesPage = () => {
 
   return (
     <div className="p-4 space-y-6">
+      <BackToTracking />
       <Tabs defaultValue="metrics" className="w-full" onValueChange={setActiveTab}>
         {/* Tabs Header */}
         <div className="bg-white border-b border-gray-200 rounded-3xl">

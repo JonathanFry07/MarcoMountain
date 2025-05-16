@@ -8,6 +8,7 @@ import RepRangeAnalysis from "@/components/progress/repRange";
 import { format } from "date-fns";
 import PaceAnalysis from "@/components/progress/paceAnalysis";
 import DistanceAnalysis from "@/components/progress/distanceAnalysis";
+import BackToTracking from "@/components/BackToTracking";
 
 function ProgressPage() {
   const { user, exerciseHistory, getExerciseHistory } = useAuthStore();
@@ -41,6 +42,7 @@ function ProgressPage() {
       <div className="flex min-h-screen flex-col bg-white">
         <div className="container py-6 sm:py-8 mx-auto">
           <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 sm:px-8 bg-white shadow-sm rounded-lg">
+          <BackToTracking className="p-4"/>
             <h2 className="text-3xl font-semibold text-cyan-500 tracking-tight sm:text-4xl">
               Exercise Analytics
             </h2>

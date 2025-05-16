@@ -11,7 +11,6 @@ import { useNavigate } from "react-router-dom";
 export default function WorkoutPage() {
   const { workouts, getWorkouts, user } = useAuthStore();
   
-  
   useEffect(() => {
     if (user && user.email) {
       getWorkouts(user.email);

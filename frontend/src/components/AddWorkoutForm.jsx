@@ -107,7 +107,7 @@ const AddWorkoutForm = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 px-4 outline outline-cyan-500">
-      <div className="relative bg-white p-6 rounded shadow-md max-w-md w-full max-h-[80vh] overflow-y-auto">
+      <div className="relative bg-white p-6 rounded shadow-md max-w-xl w-full max-h-[90vh] overflow-y-auto">
         <div className="absolute top-3 right-3 text-gray-600">
           {type === "cardio" ? (
             <Heart className="h-5 w-5 text-cyan-500" />

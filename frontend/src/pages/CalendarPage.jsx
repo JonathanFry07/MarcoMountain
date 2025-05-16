@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuthStore } from "@/store/authStore";
+import BackToTracking from "@/components/BackToTracking";
 
 const CalendarPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -85,6 +86,9 @@ const CalendarPage = () => {
 
   return (
     <div className="flex h-screen flex-col">
+      <div className="p-4">
+        <BackToTracking />
+      </div>
       <main className="flex-1 overflow-auto p-3">
         <WorkoutStats />
         <div className="space-y-4 p-2">
